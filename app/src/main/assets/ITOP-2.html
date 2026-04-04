@@ -1,0 +1,4363 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ITOP</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent
+    }
+
+    :root {
+      --blur: blur(24px);
+      --glass: rgba(255, 255, 255, 0.06);
+      --glass2: rgba(255, 255, 255, 0.1);
+      --border: rgba(255, 255, 255, 0.1);
+      --border2: rgba(255, 255, 255, 0.18);
+      --bg: #07080f;
+      --txt: #eef0ff;
+      --txt2: #8892b0;
+      --txt3: #4a5270;
+      --p: #14b8a6;
+      --p2: #0d9488;
+      --online: #34d399;
+      --red: #ef4444;
+      --ylw: #f59e0b;
+      --r: 18px;
+    }
+
+    html,
+    body {
+      height: 100%;
+      background: var(--bg);
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+      color: var(--txt);
+      overflow: hidden
+    }
+
+    /* ── ANIMATED BG ── */
+    .bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden
+    }
+
+    .bg::before {
+      content: '';
+      position: absolute;
+      width: 700px;
+      height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(20, 184, 166, .12), transparent 65%);
+      top: -150px;
+      right: -150px;
+      animation: b1 9s ease-in-out infinite alternate
+    }
+
+    .bg::after {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(99, 102, 241, .1), transparent 65%);
+      bottom: -150px;
+      left: -150px;
+      animation: b2 11s ease-in-out infinite alternate
+    }
+
+    .bg-o {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(236, 72, 153, .07), transparent 65%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: b3 13s ease-in-out infinite alternate
+    }
+
+    @keyframes b1 {
+      0% {
+        transform: translate(0, 0) scale(1)
+      }
+
+      100% {
+        transform: translate(-60px, 60px) scale(1.3)
+      }
+    }
+
+    @keyframes b2 {
+      0% {
+        transform: translate(0, 0) scale(1)
+      }
+
+      100% {
+        transform: translate(60px, -60px) scale(1.2)
+      }
+    }
+
+    @keyframes b3 {
+      0% {
+        transform: translate(-50%, -50%) scale(1)
+      }
+
+      100% {
+        transform: translate(-45%, -55%) scale(1.4)
+      }
+    }
+
+    /* ── SHELL ── */
+    #app {
+      position: relative;
+      z-index: 1;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .phone {
+      width: 100%;
+      max-width: 430px;
+      height: 100vh;
+      max-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      background: rgba(7, 8, 15, .6)
+    }
+
+    @media(min-width:500px) {
+      .phone {
+        border-radius: 44px;
+        max-height: 920px;
+        box-shadow: 0 40px 100px rgba(0, 0, 0, .7), 0 0 0 1px rgba(255, 255, 255, .07);
+        overflow: hidden
+      }
+    }
+
+    /* ── GLASS ── */
+    .gl {
+      background: var(--glass);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      border: 1px solid var(--border)
+    }
+
+    .gl2 {
+      background: var(--glass2);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      border: 1px solid var(--border2)
+    }
+
+    /* ── PAGES ── */
+    .pg {
+      display: none;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden
+    }
+
+    .pg.show {
+      display: flex
+    }
+
+    /* ══════════ AUTH ══════════ */
+    #pg-auth {
+      align-items: center;
+      justify-content: center;
+      padding: 24px
+    }
+
+    .aw {
+      width: 100%;
+      max-width: 340px
+    }
+
+    .alogo {
+      text-align: center;
+      margin-bottom: 32px
+    }
+
+    .alogo-ic {
+      width: 76px;
+      height: 76px;
+      border-radius: 26px;
+      background: linear-gradient(135deg, rgba(20, 184, 166, .25), rgba(99, 102, 241, .25));
+      border: 1px solid rgba(20, 184, 166, .35);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      font-size: 34px;
+      box-shadow: 0 8px 32px rgba(20, 184, 166, .2)
+    }
+
+    .alogo h1 {
+      font-size: 30px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #14b8a6, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text
+    }
+
+    .alogo p {
+      color: var(--txt2);
+      font-size: 13px;
+      margin-top: 6px
+    }
+
+    .ac {
+      border-radius: 24px;
+      padding: 24px
+    }
+
+    .ac h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 4px
+    }
+
+    .ac .sub {
+      color: var(--txt2);
+      font-size: 13px;
+      margin-bottom: 20px;
+      line-height: 1.5
+    }
+
+    .inp {
+      width: 100%;
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid var(--border);
+      color: var(--txt);
+      border-radius: 14px;
+      padding: 13px 16px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: all .2s;
+      margin-bottom: 12px
+    }
+
+    .inp:focus {
+      border-color: rgba(20, 184, 166, .6);
+      box-shadow: 0 0 0 3px rgba(20, 184, 166, .1)
+    }
+
+    .inp::placeholder {
+      color: var(--txt3)
+    }
+
+    .inp-otp {
+      text-align: center;
+      font-size: 28px;
+      letter-spacing: .6em;
+      font-weight: 700
+    }
+
+    .btn {
+      width: 100%;
+      background: linear-gradient(135deg, var(--p2), #6366f1);
+      color: #fff;
+      border: none;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(20, 184, 166, .25)
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px rgba(20, 184, 166, .35)
+    }
+
+    .btn:active {
+      transform: scale(.98)
+    }
+
+    .btn:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+      transform: none
+    }
+
+    .btn-g {
+      background: none;
+      border: none;
+      color: var(--txt2);
+      font-size: 13px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 10px;
+      font-family: inherit;
+      padding: 8px;
+      border-radius: 10px;
+      transition: all .2s
+    }
+
+    .btn-g:hover {
+      color: var(--txt);
+      background: rgba(255, 255, 255, .05)
+    }
+
+    .anote {
+      text-align: center;
+      color: var(--txt3);
+      font-size: 11px;
+      margin-top: 20px
+    }
+
+    /* ══════════ HEADER ══════════ */
+    .hdr {
+      padding: 14px 16px 12px;
+      flex-shrink: 0;
+      background: rgba(7, 8, 15, .5);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      border-bottom: 1px solid var(--border)
+    }
+
+    .hdr-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .hdr-av {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .hdr-acts {
+      display: flex;
+      gap: 6px
+    }
+
+    .hb {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid var(--border);
+      color: var(--txt2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: all .2s
+    }
+
+    .hb:hover {
+      background: rgba(255, 255, 255, .12);
+      color: var(--txt)
+    }
+
+    /* ══════════ CONV LIST ══════════ */
+    .cvl {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px
+    }
+
+    .cvi {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all .2s;
+      margin-bottom: 4px;
+      border: 1px solid transparent
+    }
+
+    .cvi:hover {
+      background: rgba(255, 255, 255, .04);
+      border-color: var(--border)
+    }
+
+    .cvi.act {
+      background: rgba(20, 184, 166, .08);
+      border-color: rgba(20, 184, 166, .25)
+    }
+
+    .ci {
+      flex: 1;
+      min-width: 0
+    }
+
+    .cn {
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis
+    }
+
+    .ctm {
+      font-size: 11px;
+      color: var(--txt3);
+      flex-shrink: 0
+    }
+
+    .cp {
+      font-size: 12px;
+      color: var(--txt2);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis
+    }
+
+    .ubdg {
+      background: var(--p);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 10px;
+      padding: 2px 7px;
+      flex-shrink: 0
+    }
+
+    /* ══════════ CHAT WINDOW ══════════ */
+    .ch {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: rgba(7, 8, 15, .55);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0
+    }
+
+    .msgs {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px
+    }
+
+    .dsep {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 8px 0
+    }
+
+    .dsep::before,
+    .dsep::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border)
+    }
+
+    .dsep span {
+      font-size: 11px;
+      color: var(--txt3)
+    }
+
+    /* ── BUBBLES ── */
+    .mr {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      margin-bottom: 2px
+    }
+
+    .mr.mn {
+      flex-direction: row-reverse
+    }
+
+    .bb {
+      max-width: 78%;
+      padding: 10px 14px;
+      border-radius: 18px;
+      font-size: 13.5px;
+      line-height: 1.5;
+      word-break: break-word;
+      position: relative
+    }
+
+    .bb.th {
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-bottom-right-radius: 4px;
+      backdrop-filter: blur(10px)
+    }
+
+    .bb.mn {
+      background: linear-gradient(135deg, rgba(13, 148, 136, .75), rgba(99, 102, 241, .55));
+      border: 1px solid rgba(20, 184, 166, .25);
+      border-bottom-left-radius: 4px
+    }
+
+    .bb.anon {
+      background: rgba(139, 92, 246, .15);
+      border-color: rgba(139, 92, 246, .3)
+    }
+
+    .atag {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: #a78bfa;
+      margin-bottom: 4px
+    }
+
+    .mm {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 5px;
+      font-size: 11px
+    }
+
+    .mm.mn {
+      justify-content: flex-end;
+      color: rgba(255, 255, 255, .45)
+    }
+
+    .mm.th {
+      color: var(--txt3)
+    }
+
+    .seen {
+      color: #34d399 !important
+    }
+
+    /* ── DEV BUBBLE ── */
+    .dev-txt {
+      background: linear-gradient(135deg, #e879f9, #fb923c, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 600
+    }
+
+    /* ── PRESIDENT BUBBLE ── */
+    .bb.admin {
+      background: linear-gradient(135deg, rgba(168, 85, 247, .25), rgba(236, 72, 153, .2), rgba(99, 102, 241, .2));
+      border: 1px solid rgba(255, 255, 255, .25);
+      backdrop-filter: blur(18px);
+      position: relative;
+      box-shadow: 0 8px 32px rgba(168, 85, 247, .15);
+      overflow: visible;
+    }
+
+    .bb.admin::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      z-index: -1;
+      background: linear-gradient(135deg, rgba(255, 255, 255, .4), transparent, rgba(255, 255, 255, .2));
+      border-radius: inherit;
+      opacity: .5;
+    }
+
+    .admin-eagle {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 20px;
+      filter: drop-shadow(0 0 8px rgba(168, 85, 247, .6));
+      pointer-events: none
+    }
+
+    /* ── SYSTEM NOTICE ── */
+    .sys-notice {
+      margin: 10px 14px;
+      padding: 12px;
+      background: rgba(20, 184, 166, .1);
+      border: 1px dashed rgba(20, 184, 166, .3);
+      border-radius: 18px;
+      text-align: center;
+      position: relative;
+      overflow: visible;
+      box-shadow: 0 10px 25px -10px rgba(0, 0, 0, .3)
+    }
+
+    .sys-notice::before {
+      content: '🛡️';
+      position: absolute;
+      top: -8px;
+      left: -8px;
+      font-size: 32px;
+      opacity: .1;
+      z-index: 0
+    }
+
+    .sys-notice-txt {
+      font-size: 13px;
+      color: #fff;
+      font-weight: 600;
+      line-height: 1.5;
+      position: relative;
+      z-index: 1;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, .5)
+    }
+
+    .sys-notice-label {
+      font-size: 11px;
+      color: var(--txt3);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+      display: block;
+      position: relative;
+      z-index: 1
+    }
+
+    /* ── REPLY ── */
+    .rply-bar {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      background: rgba(255, 255, 255, .04);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border)
+    }
+
+    .rply-bar.show {
+      display: flex
+    }
+
+    .rply-cnt {
+      flex: 1;
+      font-size: 12px;
+      color: var(--txt2);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .rply-prv {
+      background: rgba(255, 255, 255, .07);
+      border-right: 2px solid var(--p);
+      border-radius: 8px;
+      padding: 6px 10px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: var(--txt2)
+    }
+
+    /* ── TYPING ── */
+    .typrow {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px
+    }
+
+    .typbub {
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 18px;
+      border-bottom-right-radius: 4px;
+      padding: 12px 16px;
+      display: flex;
+      gap: 4px;
+      align-items: center
+    }
+
+    .td {
+      width: 6px;
+      height: 6px;
+      background: var(--txt3);
+      border-radius: 50%;
+      animation: td 1.4s ease-in-out infinite
+    }
+
+    .td:nth-child(2) {
+      animation-delay: .2s
+    }
+
+    .td:nth-child(3) {
+      animation-delay: .4s
+    }
+
+    @keyframes td {
+
+      0%,
+      60%,
+      100% {
+        transform: translateY(0)
+      }
+
+      30% {
+        transform: translateY(-5px)
+      }
+    }
+
+    /* ── IMAGE MSG ── */
+    .img-msg {
+      max-width: 220px;
+      border-radius: 14px;
+      overflow: hidden;
+      cursor: pointer
+    }
+
+    .img-msg img {
+      width: 100%;
+      display: block
+    }
+
+    /* ── AUDIO MSG ── */
+    .audio-msg {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, .07);
+      border-radius: 14px;
+      min-width: 160px
+    }
+
+    .audio-play {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--p2);
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0
+    }
+
+    .audio-wave {
+      flex: 1;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      gap: 2px
+    }
+
+    .audio-bar {
+      width: 3px;
+      background: var(--p);
+      border-radius: 2px;
+      animation: wav 1s ease-in-out infinite alternate
+    }
+
+    .audio-bar:nth-child(1) {
+      height: 8px;
+      animation-delay: 0s
+    }
+
+    .audio-bar:nth-child(2) {
+      height: 14px;
+      animation-delay: .1s
+    }
+
+    .audio-bar:nth-child(3) {
+      height: 20px;
+      animation-delay: .2s
+    }
+
+    .audio-bar:nth-child(4) {
+      height: 16px;
+      animation-delay: .3s
+    }
+
+    .audio-bar:nth-child(5) {
+      height: 10px;
+      animation-delay: .4s
+    }
+
+    .audio-bar:nth-child(6) {
+      height: 18px;
+      animation-delay: .5s
+    }
+
+    .audio-bar:nth-child(7) {
+      height: 12px;
+      animation-delay: .6s
+    }
+
+    @keyframes wav {
+      0% {
+        transform: scaleY(.5)
+      }
+
+      100% {
+        transform: scaleY(1)
+      }
+    }
+
+    .audio-dur {
+      font-size: 11px;
+      color: var(--txt3);
+      flex-shrink: 0
+    }
+
+    /* ── SELF DESTRUCT ── */
+    .sd-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(239, 68, 68, .15);
+      border: 1px solid rgba(239, 68, 68, .3);
+      color: #f87171
+    }
+
+    .sd-timer {
+      font-size: 10px;
+      color: #f87171;
+      margin-top: 2px
+    }
+
+    /* ══════════ INPUT AREA ══════════ */
+    .ia {
+      padding: 10px 12px;
+      background: rgba(7, 8, 15, .55);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+      position: relative
+    }
+
+    .atog {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, .05);
+      color: var(--txt3);
+      cursor: pointer;
+      transition: all .2s;
+      font-family: inherit
+    }
+
+    .atog.on {
+      background: rgba(139, 92, 246, .15);
+      border-color: rgba(139, 92, 246, .4);
+      color: #c4b5fd
+    }
+
+    .ia-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      flex-wrap: wrap
+    }
+
+    .iab {
+      background: none;
+      border: none;
+      color: var(--txt3);
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px;
+      border-radius: 8px;
+      transition: all .2s
+    }
+
+    .iab:hover {
+      color: var(--txt);
+      background: rgba(255, 255, 255, .07)
+    }
+
+    .ir {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end
+    }
+
+    .mi {
+      flex: 1;
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid var(--border);
+      color: var(--txt);
+      border-radius: 16px;
+      padding: 11px 14px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      resize: none;
+      transition: all .2s;
+      min-height: 44px;
+      max-height: 120px
+    }
+
+    .mi:focus {
+      border-color: rgba(20, 184, 166, .5)
+    }
+
+    .mi::placeholder {
+      color: var(--txt3)
+    }
+
+    .sndb {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, var(--p2), #6366f1);
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all .2s;
+      flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(20, 184, 166, .3)
+    }
+
+    .sndb:hover {
+      transform: scale(1.05)
+    }
+
+    .sndb:active {
+      transform: scale(.95)
+    }
+
+    .sndb:disabled {
+      opacity: .4;
+      cursor: not-allowed;
+      transform: none
+    }
+
+    .recb {
+      width: 44px;
+      height: 44px;
+      border: 1px solid rgba(239, 68, 68, .4);
+      border-radius: 14px;
+      color: #f87171;
+      cursor: pointer;
+      font-size: 18px;
+      transition: all .2s;
+      flex-shrink: 0;
+      background: rgba(239, 68, 68, .1);
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .recb.recording {
+      background: rgba(239, 68, 68, .3);
+      border-color: var(--red);
+      animation: recpulse 1s ease-in-out infinite
+    }
+
+    @keyframes recpulse {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, .4)
+      }
+
+      50% {
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, .0)
+      }
+    }
+
+    /* ── EMOJI PICKER ── */
+    .epick {
+      display: none;
+      position: absolute;
+      bottom: 75px;
+      right: 12px;
+      background: rgba(12, 12, 25, .97);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border2);
+      border-radius: 20px;
+      padding: 12px;
+      width: 280px;
+      z-index: 100;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, .5)
+    }
+
+    .epick.show {
+      display: block
+    }
+
+    .egrid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 4px
+    }
+
+    .ebtn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-radius: 8px;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .15s
+    }
+
+    .ebtn:hover {
+      background: rgba(255, 255, 255, .1)
+    }
+
+    /* ══════════ AVATAR ══════════ */
+    .av {
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: relative;
+      font-weight: 600;
+      color: #fff;
+      flex-shrink: 0;
+      position: relative;
+      overflow: visible
+    }
+
+    .av-xs {
+      width: 28px;
+      height: 28px;
+      font-size: 10px
+    }
+
+    .av-sm {
+      width: 38px;
+      height: 38px;
+      font-size: 13px
+    }
+
+    .av-md {
+      width: 46px;
+      height: 46px;
+      font-size: 15px
+    }
+
+    .av-lg {
+      width: 60px;
+      height: 60px;
+      font-size: 20px
+    }
+
+    .av-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: #fff
+    }
+
+    .av img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%
+    }
+
+    .odot {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid var(--bg)
+    }
+
+    .odot.on {
+      background: var(--online)
+    }
+
+    .odot.off {
+      background: var(--txt3)
+    }
+
+    /* ══════════ BADGES ══════════ */
+    .bdg {
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+      margin: 0 2px
+    }
+
+    .bdg svg {
+      width: 15px;
+      height: 15px
+    }
+
+    /* Multi-color Badges */
+    .bdg-blue {
+      color: #3b82f6
+    }
+
+    .bdg-gold {
+      color: #eab308
+    }
+
+    .bdg-purple {
+      color: #a855f7
+    }
+
+    .bdg-orange {
+      color: #f97316
+    }
+
+    .bdg-red {
+      color: #ef4444
+    }
+
+    /* Presidential Style */
+    .pres-label {
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+      margin-right: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .pres-profile {
+      border: 2px solid #f59e0b !important;
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(239, 68, 68, 0.05)) !important;
+    }
+
+    .pres-ph-hidden {
+      filter: blur(4px);
+      user-select: none;
+      cursor: help
+    }
+
+    /* ══════════ ADMIN DASHBOARD ══════════ */
+    .adm-card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px
+    }
+
+    .adm-stat-box {
+      padding: 16px;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      transition: transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .adm-stat-box:hover {
+      transform: translateY(-2px)
+    }
+
+    .adm-stat-box i {
+      font-size: 24px;
+      margin-bottom: 8px;
+      opacity: 0.8
+    }
+
+    .adm-stat-box .val {
+      font-size: 24px;
+      font-weight: 700
+    }
+
+    .adm-stat-box .lbl {
+      font-size: 12px;
+      opacity: 0.7
+    }
+
+    .adm-stat-box::after {
+      content: '';
+      position: absolute;
+      right: -10px;
+      bottom: -10px;
+      font-size: 60px;
+      opacity: 0.05;
+      font-weight: 900;
+    }
+
+    /* ══════════ BOTTOM NAV ══════════ */
+    .bnav {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 8px 16px 12px;
+      background: rgba(7, 8, 15, .65);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0
+    }
+
+    .nb {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      background: none;
+      border: none;
+      color: var(--txt3);
+      cursor: pointer;
+      padding: 6px 14px;
+      border-radius: 14px;
+      transition: all .2s;
+      font-family: inherit;
+      position: relative
+    }
+
+    .nb.act {
+      color: var(--p)
+    }
+
+    .nb .ni {
+      font-size: 20px;
+      transition: transform .2s
+    }
+
+    .nb.act .ni {
+      transform: scale(1.1)
+    }
+
+    .nb span {
+      font-size: 10px;
+      font-weight: 500
+    }
+
+    .nb-dot {
+      position: absolute;
+      top: 4px;
+      right: 6px;
+      width: 7px;
+      height: 7px;
+      background: var(--red);
+      border-radius: 50%;
+      border: 2px solid var(--bg);
+      display: none
+    }
+
+    .nb-dot.show {
+      display: block
+    }
+
+    /* ══════════ PREMIUM VIP BADGE ══════════ */
+    .bdg-vip {
+      display: inline-flex;
+      align-items: center;
+      vertical-align: middle;
+      position: relative;
+      margin-right: 4px;
+      background: linear-gradient(135deg, rgba(255, 255, 255, .1), rgba(255, 255, 255, .05));
+      border: 1px solid rgba(255, 255, 255, .2);
+      border-radius: 6px;
+      padding: 1px 4px;
+    }
+
+    .bdg-vip svg {
+      width: 16px;
+      height: 16px;
+      filter: drop-shadow(0 0 10px rgba(236, 72, 153, .8))
+    }
+
+    .bdg-vip::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .4), transparent);
+      transform: translateX(-100%);
+      animation: shimmer 3s infinite;
+    }
+
+    /* ── COLOR DOTS ── */
+    .clr-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid rgba(255, 255, 255, .3);
+      transition: all .2s;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, .2)
+    }
+
+    .clr-dot:hover {
+      transform: scale(1.2);
+      border-color: #fff
+    }
+
+    .clr-dot.act {
+      border-color: #fff;
+      box-shadow: 0 0 15px currentColor
+    }
+
+    /* ══════════ PROFILE MODAL ══════════ */
+    .prof-hd {
+      text-align: center;
+      padding: 30px 20px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .prof-av {
+      width: 110px;
+      height: 110px;
+      border-radius: 38px;
+      margin: 0 auto 16px;
+      position: relative;
+      box-shadow: 0 15px 45px rgba(0, 0, 0, .5);
+      border: 2px solid var(--border2);
+      z-index: 2;
+      transition: transform .3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .prof-av:hover {
+      transform: scale(1.05);
+    }
+
+    .prof-av img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 36px
+    }
+
+    .prof-nm {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .prof-ph {
+      font-size: 14px;
+      color: var(--txt2);
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .prof-bio {
+      font-size: 14px;
+      color: var(--txt);
+      line-height: 1.6;
+      background: rgba(255, 255, 255, .05);
+      backdrop-filter: blur(10px);
+      border-radius: 18px;
+      padding: 16px;
+      margin: 10px 0;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      position: relative;
+      z-index: 2;
+    }
+
+    .prof-stat {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 20px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .ps-item {
+      text-align: center;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 8px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border2);
+    }
+
+    .ps-v {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--p)
+    }
+
+    .ps-l {
+      font-size: 11px;
+      color: var(--txt3);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── ELITE / PRESIDENTIAL PROFILE OVERRIDES ── */
+    @keyframes goldPulse {
+      0% {
+        box-shadow: 0 0 20px rgba(245, 158, 11, 0.4), inset 0 0 10px rgba(245, 158, 11, 0.2);
+      }
+
+      50% {
+        box-shadow: 0 0 40px rgba(245, 158, 11, 0.8), inset 0 0 20px rgba(245, 158, 11, 0.4);
+      }
+
+      100% {
+        box-shadow: 0 0 20px rgba(245, 158, 11, 0.4), inset 0 0 10px rgba(245, 158, 11, 0.2);
+      }
+    }
+
+    @keyframes floatRockets {
+      0% {
+        transform: translateY(0px) rotate(-15deg);
+      }
+
+      50% {
+        transform: translateY(-15px) rotate(-15deg);
+      }
+
+      100% {
+        transform: translateY(0px) rotate(-15deg);
+      }
+    }
+
+    @keyframes floatRocketsR {
+      0% {
+        transform: translateY(0px) rotate(15deg) scaleX(-1);
+      }
+
+      50% {
+        transform: translateY(-15px) rotate(15deg) scaleX(-1);
+      }
+
+      100% {
+        transform: translateY(0px) rotate(15deg) scaleX(-1);
+      }
+    }
+
+    .pres-profile .modal {
+      background: linear-gradient(145deg, #1a0f0f, #221414, #120909);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      box-shadow: 0 10px 40px rgba(245, 158, 11, 0.2);
+    }
+
+    .pres-profile .mh {
+      background: linear-gradient(90deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.1));
+      border-bottom: 2px solid rgba(245, 158, 11, 0.4);
+      color: #fca5a5;
+    }
+
+    .pres-profile .prof-av {
+      width: 140px;
+      height: 140px;
+      border: 3px solid #f59e0b;
+      box-shadow: 0 0 30px rgba(245, 158, 11, 0.6);
+      animation: goldPulse 3s infinite;
+      border-radius: 42px;
+    }
+
+    .pres-profile .prof-av img {
+      border-radius: 39px;
+    }
+
+    .pres-profile .prof-nm {
+      font-size: 26px;
+      color: #fde68a;
+      text-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+      margin-top: 10px;
+    }
+
+    .pres-profile .prof-bio {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(239, 68, 68, 0.1));
+      border-color: rgba(245, 158, 11, 0.3);
+      color: #fef3c7;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .pres-ph-hidden {
+      color: #f59e0b;
+      font-weight: 800;
+      background: rgba(245, 158, 11, 0.15);
+      padding: 6px 14px;
+      border-radius: 20px;
+      display: inline-block;
+      border: 1px dashed rgba(245, 158, 11, 0.5);
+    }
+
+    .pres-wings {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 250px;
+      transform: translate(-50%, -50%);
+      font-size: 130px;
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      filter: drop-shadow(0 0 15px #f59e0b);
+    }
+
+    .pres-crown {
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 45px;
+      z-index: 3;
+      filter: drop-shadow(0 0 10px #f59e0b);
+      animation: floatRockets 4s infinite ease-in-out;
+    }
+
+    .pres-rocket-l,
+    .pres-rocket-r {
+      position: absolute;
+      font-size: 40px;
+      z-index: 3;
+      filter: drop-shadow(0 0 10px #ef4444);
+    }
+
+    .pres-rocket-l {
+      left: 10px;
+      top: 40px;
+      animation: floatRockets 3s infinite ease-in-out;
+    }
+
+    .pres-rocket-r {
+      right: 10px;
+      top: 40px;
+      animation: floatRocketsR 3.5s infinite ease-in-out;
+    }
+
+    /* ══════════ SETTINGS ══════════ */
+    #pg-sets {
+      overflow-y: auto
+    }
+
+    .sets-hd {
+      padding: 18px 16px 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+      background: rgba(7, 8, 15, .5);
+      border-bottom: 1px solid var(--border)
+    }
+
+    .sets-hd h2 {
+      font-size: 18px;
+      font-weight: 700
+    }
+
+    .sets-body {
+      padding: 12px 14px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px
+    }
+
+    .sets-av-sec {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 28px 16px 20px;
+      gap: 14px;
+      position: relative
+    }
+
+    .sets-av-edit {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--p);
+      border: 2px solid var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      cursor: pointer
+    }
+
+    .sets-sec {
+      border-radius: var(--r);
+      overflow: hidden
+    }
+
+    .si {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background .2s
+    }
+
+    .si:last-child {
+      border-bottom: none
+    }
+
+    .si:hover {
+      background: rgba(255, 255, 255, .04)
+    }
+
+    .sil {
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    .si-ic {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0
+    }
+
+    .si-lbl {
+      font-size: 14px;
+      font-weight: 500
+    }
+
+    .si-sub {
+      font-size: 12px;
+      color: var(--txt2);
+      margin-top: 2px
+    }
+
+    .tgl {
+      width: 46px;
+      height: 28px;
+      background: var(--txt3);
+      border-radius: 14px;
+      position: relative;
+      cursor: pointer;
+      transition: background .3s;
+      flex-shrink: 0
+    }
+
+    .tgl.on {
+      background: var(--p)
+    }
+
+    .tgl::after {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background: #fff;
+      border-radius: 50%;
+      top: 3px;
+      right: 3px;
+      transition: transform .3s;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .3)
+    }
+
+    .tgl.on::after {
+      transform: translateX(-18px)
+    }
+
+    .sd-select {
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid var(--border);
+      color: var(--txt);
+      border-radius: 10px;
+      padding: 6px 12px;
+      font-family: inherit;
+      font-size: 13px;
+      outline: none;
+      cursor: pointer
+    }
+
+    .sd-select option {
+      background: #1a1a2e
+    }
+
+    /* ── PRES PINNED WARNING ── */
+    .pres-warning {
+      padding: 10px 14px;
+      background: linear-gradient(135deg, rgba(245, 158, 11, .18), rgba(239, 68, 68, .12));
+      border-bottom: 2px solid rgba(245, 158, 11, .5);
+      flex-shrink: 0;
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      animation: presWarnPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes presWarnPulse {
+
+      0%,
+      100% {
+        border-bottom-color: rgba(245, 158, 11, .5)
+      }
+
+      50% {
+        border-bottom-color: rgba(245, 158, 11, .9)
+      }
+    }
+
+    .pres-warning-icon {
+      font-size: 22px;
+      flex-shrink: 0;
+      filter: drop-shadow(0 0 8px rgba(245, 158, 11, .7))
+    }
+
+    .pres-warning-body {
+      flex: 1;
+      min-width: 0
+    }
+
+    .pres-warning-title {
+      font-size: 11px;
+      font-weight: 800;
+      color: #f59e0b;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      margin-bottom: 3px
+    }
+
+    .pres-warning-txt {
+      font-size: 12px;
+      color: #fde68a;
+      line-height: 1.5;
+      font-weight: 500
+    }
+
+    /* ══════════ ADMIN ══════════ */
+    #pg-admin {
+      overflow-y: auto
+    }
+
+    .adm-hd {
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      background: linear-gradient(135deg, rgba(239, 68, 68, .08), rgba(245, 158, 11, .04));
+      border-bottom: 1px solid rgba(239, 68, 68, .2)
+    }
+
+    .adm-hd-l {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .adm-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(239, 68, 68, .4), rgba(245, 158, 11, .3));
+      border: 1px solid rgba(239, 68, 68, .4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 4px 16px rgba(239, 68, 68, .25)
+    }
+
+    .adm-body {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px
+    }
+
+    .adm-stats {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px
+    }
+
+    .stcard {
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px
+    }
+
+    .stv {
+      font-size: 26px;
+      font-weight: 800
+    }
+
+    .stl {
+      font-size: 11px;
+      color: var(--txt2);
+      margin-top: 2px;
+      font-weight: 500
+    }
+
+    .adm-tabs {
+      display: flex;
+      gap: 5px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none
+    }
+
+    .adm-tabs::-webkit-scrollbar {
+      display: none
+    }
+
+    .at {
+      padding: 7px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, .05);
+      color: var(--txt2);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+      transition: all .2s;
+      flex-shrink: 0
+    }
+
+    .at.act {
+      background: rgba(239, 68, 68, .2);
+      border-color: rgba(239, 68, 68, .4);
+      color: #fca5a5;
+      font-weight: 700
+    }
+
+    .acard {
+      border-radius: 16px;
+      overflow: hidden
+    }
+
+    .ach {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px
+    }
+
+    .ach-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 8px;
+      background: rgba(239, 68, 68, .15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, .25)
+    }
+
+    .ar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--border);
+      transition: background .15s
+    }
+
+    .ar:last-child {
+      border-bottom: none
+    }
+
+    .ar:hover {
+      background: rgba(255, 255, 255, .03)
+    }
+
+    .aui {
+      flex: 1;
+      min-width: 0
+    }
+
+    .aun {
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap
+    }
+
+    .aph {
+      font-size: 11px;
+      color: var(--txt2);
+      margin-top: 2px;
+      direction: ltr
+    }
+
+    .aacts {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      justify-content: flex-end
+    }
+
+    .aab {
+      min-width: 30px;
+      height: 30px;
+      padding: 0 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, .05);
+      color: var(--txt2);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      gap: 4px;
+      transition: all .2s;
+      white-space: nowrap
+    }
+
+    .aab:hover {
+      background: rgba(255, 255, 255, .1);
+      color: var(--txt)
+    }
+
+    .aab.danger:hover {
+      background: rgba(239, 68, 68, .2);
+      border-color: rgba(239, 68, 68, .4);
+      color: #f87171
+    }
+
+    .aab.success:hover {
+      background: rgba(52, 211, 153, .2);
+      border-color: rgba(52, 211, 153, .4);
+      color: #34d399
+    }
+
+    .bbs {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap
+    }
+
+    .bbo {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      transition: all .2s
+    }
+
+    .bbo:hover {
+      transform: scale(1.15)
+    }
+
+    .bbo.sel {
+      border-color: #fff !important;
+      box-shadow: 0 0 8px currentColor
+    }
+
+    .bdg-legend {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border)
+    }
+
+    .bdg-leg-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: var(--txt2)
+    }
+
+    .bdg-leg-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0
+    }
+
+    .otp-form {
+      padding: 12px 14px;
+      display: flex;
+      gap: 8px
+    }
+
+    .otpinp {
+      flex: 1;
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid var(--border);
+      color: var(--txt);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none
+    }
+
+    .otpinp:focus {
+      border-color: rgba(245, 158, 11, .5)
+    }
+
+    .byel {
+      background: linear-gradient(135deg, #d97706, #f59e0b);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all .2s
+    }
+
+    .byel:hover {
+      opacity: .9
+    }
+
+    .ores {
+      margin: 0 14px 14px;
+      padding: 14px;
+      background: rgba(245, 158, 11, .07);
+      border: 1px solid rgba(245, 158, 11, .3);
+      border-radius: 14px
+    }
+
+    .ocode {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: .3em;
+      color: #fef08a;
+      font-family: monospace
+    }
+
+    .banbdg {
+      background: rgba(239, 68, 68, .2);
+      border: 1px solid rgba(239, 68, 68, .3);
+      border-radius: 5px;
+      padding: 1px 6px;
+      font-size: 10px;
+      color: #f87171
+    }
+
+    .ont {
+      font-size: 11px
+    }
+
+    .ont.on {
+      color: var(--online)
+    }
+
+    .ont.off {
+      color: var(--txt3)
+    }
+
+    .adm-search {
+      width: 100%;
+      height: 38px;
+      background: rgba(255, 255, 255, .06);
+      border: 1px solid var(--border);
+      color: var(--txt);
+      border-radius: 12px;
+      padding: 0 14px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      margin-bottom: 8px
+    }
+
+    .adm-search:focus {
+      border-color: rgba(239, 68, 68, .4)
+    }
+
+    .adm-act-btn {
+      background: linear-gradient(135deg, rgba(239, 68, 68, .3), rgba(245, 158, 11, .2));
+      border: 1px solid rgba(239, 68, 68, .35);
+      color: #fca5a5;
+      border-radius: 10px;
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all .2s
+    }
+
+    .adm-act-btn:hover {
+      opacity: .85
+    }
+
+    .adm-prof-av {
+      width: 80px;
+      height: 80px;
+      border-radius: 28px;
+      margin: 0 auto 14px;
+      cursor: pointer;
+      position: relative;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .4)
+    }
+
+    .adm-prof-edit {
+      position: absolute;
+      bottom: -4px;
+      right: -4px;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--p);
+      border: 2px solid var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px
+    }
+
+    .adm-inp {
+      width: 100%;
+      background: rgba(255, 255, 255, .07);
+      border: 1px solid var(--border);
+      color: var(--txt);
+      border-radius: 12px;
+      padding: 11px 14px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: all .2s;
+      margin-bottom: 10px
+    }
+
+    .adm-inp:focus {
+      border-color: rgba(239, 68, 68, .5)
+    }
+
+    /* ══════════ MODAL ══════════ */
+    .mov {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 200;
+      background: rgba(0, 0, 0, .65);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      align-items: flex-end;
+      justify-content: center
+    }
+
+    .mov.show {
+      display: flex
+    }
+
+    .modal {
+      background: rgba(12, 12, 28, .97);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border2);
+      border-radius: 28px 28px 0 0;
+      width: 100%;
+      max-height: 88%;
+      overflow-y: auto;
+      animation: slu .3s cubic-bezier(.34, 1.56, .64, 1)
+    }
+
+    @keyframes slu {
+      from {
+        transform: translateY(100%);
+        opacity: 0
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1
+      }
+    }
+
+    .mh {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      font-size: 16px;
+      font-weight: 600
+    }
+
+    .mhnd {
+      width: 36px;
+      height: 4px;
+      background: rgba(255, 255, 255, .2);
+      border-radius: 2px;
+      margin: 12px auto 0
+    }
+
+    .mb {
+      padding: 20px
+    }
+
+    .xb {
+      background: rgba(255, 255, 255, .1);
+      border: none;
+      color: var(--txt2);
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .xb:hover {
+      background: rgba(255, 255, 255, .2);
+      color: var(--txt)
+    }
+
+    .fu {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-top: 14px
+    }
+
+    /* ══════════ LIGHTBOX ══════════ */
+    .lbox {
+      display: none;
+      position: absolute;
+      inset: 0;
+      z-index: 300;
+      background: rgba(0, 0, 0, .92);
+      align-items: center;
+      justify-content: center
+    }
+
+    .lbox.show {
+      display: flex
+    }
+
+    .lbox img {
+      max-width: 95%;
+      max-height: 90%;
+      border-radius: 12px;
+      object-fit: contain
+    }
+
+    .lbox-close {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: rgba(255, 255, 255, .15);
+      border: none;
+      color: #fff;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    /* ══════════ NOTIFICATIONS ══════════ */
+    @keyframes nslide {
+      from {
+        transform: translateY(-100%);
+        opacity: 0
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1
+      }
+    }
+
+    .nban {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 250;
+      padding: 14px 16px;
+      background: rgba(12, 12, 28, .98);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border2);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      animation: nslide .3s ease;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .4)
+    }
+
+    .nban-info {
+      flex: 1;
+      min-width: 0
+    }
+
+    .nban-nm {
+      font-size: 13px;
+      font-weight: 600
+    }
+
+    .nban-msg {
+      font-size: 12px;
+      color: var(--txt2);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis
+    }
+
+    /* ══════════ TOAST ══════════ */
+    #twrap {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      pointer-events: none;
+      width: 90%
+    }
+
+    .toast {
+      background: rgba(15, 15, 30, .97);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border2);
+      color: var(--txt);
+      padding: 10px 18px;
+      border-radius: 14px;
+      font-size: 13px;
+      opacity: 0;
+      transform: translateY(-10px) scale(.96);
+      transition: all .25s;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, .4);
+      text-align: center
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0) scale(1)
+    }
+
+    /* SPINNER */
+    .sp {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, .2);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: sp .6s linear infinite;
+      display: inline-block
+    }
+
+    .sp2 {
+      width: 28px;
+      height: 28px;
+      border: 2px solid rgba(20, 184, 166, .2);
+      border-top-color: var(--p);
+      border-radius: 50%;
+      animation: sp .6s linear infinite
+    }
+
+    @keyframes sp {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    /* ══════════ IMAGE PREVIEW ══════════ */
+    .img-prev {
+      display: none;
+      position: absolute;
+      bottom: 75px;
+      left: 12px;
+      right: 12px;
+      background: rgba(12, 12, 28, .97);
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 12px;
+      gap: 10px;
+      align-items: center
+    }
+
+    .img-prev.show {
+      display: flex
+    }
+
+    .img-prev img {
+      width: 60px;
+      height: 60px;
+      border-radius: 10px;
+      object-fit: cover
+    }
+
+    .img-prev-info {
+      flex: 1;
+      font-size: 12px;
+      color: var(--txt2)
+    }
+
+    /* ══════════ MISC ══════════ */
+    .msgs::-webkit-scrollbar,
+    .cvl::-webkit-scrollbar,
+    .adm-body::-webkit-scrollbar,
+    .sets-body::-webkit-scrollbar {
+      width: 0
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg">
+    <div class="bg-o"></div>
+  </div>
+  <div id="app">
+    <div class="phone" id="phone">
+      <div id="twrap"></div>
+      <div class="lbox" id="lbox" onclick="this.classList.remove('show')">
+        <button class="lbox-close">✕</button>
+        <img id="lbox-img" src="" alt="">
+      </div>
+
+      <!-- ══════════════════ AUTH ══════════════════ -->
+      <div class="pg show" id="pg-auth">
+        <div class="aw">
+          <div class="alogo">
+            <div class="alogo-ic">🔐</div>
+            <h1>ITOP</h1>
+            <p>محادثات مشفرة end-to-end</p>
+          </div>
+          <div class="ac gl" id="s1">
+            <h2>أدخل رقم هاتفك</h2>
+            <p class="sub">سيتواصل معك المسؤول عبر واتساب بالكود</p>
+            <input class="inp" id="phInp" type="tel" placeholder="+201234567890" dir="ltr">
+            <button class="btn" id="rBtn" onclick="reqOTP()"><span>طلب كود التحقق</span><span>←</span></button>
+          </div>
+          <div class="ac gl" id="s2" style="display:none">
+            <h2>أدخل كود التحقق</h2>
+            <p class="sub">أدخل الكود المرسل لك على واتساب</p>
+            <input class="inp inp-otp" id="otpInp" type="text" placeholder="000000" maxlength="6"
+              oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)">
+            <button class="btn" id="vBtn" onclick="verOTP()">تأكيد الكود ✓</button>
+            <button class="btn-g" onclick="step(1)">← تغيير رقم الهاتف</button>
+          </div>
+          <div class="ac gl" id="s3" style="display:none">
+            <h2>مرحباً بك 👋</h2>
+            <p class="sub">اختر اسماً يظهر للآخرين</p>
+            <input class="inp" id="unInp" type="text" placeholder="اسمك هنا" maxlength="30">
+            <button class="btn" id="pBtn" onclick="mkProf()">ابدأ المحادثة 🚀</button>
+          </div>
+          <p class="anote">🔒 رسائلك مشفرة end-to-end</p>
+        </div>
+      </div>
+
+      <!-- ══════════════════ CHAT ══════════════════ -->
+      <div class="pg" id="pg-chat">
+        <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+          <!-- Conversations -->
+          <div id="cvView" style="display:flex;flex-direction:column;height:100%">
+            <div class="hdr gl">
+              <div class="hdr-row">
+                <div class="hdr-av">
+                  <div class="av av-sm" id="myAv"></div>
+                  <div>
+                    <div id="myNm" style="font-size:14px;font-weight:600;display:flex;align-items:center;gap:4px"></div>
+                    <div style="font-size:11px;color:var(--online)">متصل</div>
+                  </div>
+                </div>
+                <div class="hdr-acts">
+                  <button class="hb" onclick="openNC()">✚</button>
+                  <button class="hb" id="admBtnTop" style="display:none;color:#f87171"
+                    onclick="navTo('admin')">🛡️</button>
+                </div>
+              </div>
+              <input
+                style="width:100%;background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--txt);border-radius:12px;padding:9px 14px;font-size:13px;font-family:inherit;outline:none;margin-top:10px"
+                placeholder="🔍 بحث..." oninput="filtC(this.value)">
+            </div>
+            <div class="cvl" id="cvlEl">
+              <div style="text-align:center;padding:48px 20px;color:var(--txt2)">
+                <div style="font-size:48px;margin-bottom:14px">🔐</div>
+                <div style="font-size:14px;font-weight:600;margin-bottom:8px;color:var(--txt)">لا توجد محادثات بعد</div>
+                <button
+                  style="margin-top:8px;background:linear-gradient(135deg,var(--p2),#6366f1);color:#fff;border:none;border-radius:14px;padding:10px 22px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer"
+                  onclick="openNC()">✚ ابدأ محادثة جديدة</button>
+              </div>
+            </div>
+          </div>
+          <!-- Chat Window -->
+          <div id="cwView" style="display:none;flex-direction:column;height:100%">
+            <div class="ch gl">
+              <button onclick="backList()"
+                style="background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--txt2);cursor:pointer;width:36px;height:36px;border-radius:12px;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0">←</button>
+              <div class="av av-sm" id="chAv"></div>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:14px;font-weight:600;display:flex;align-items:center;gap:4px" id="chNm"></div>
+                <div style="font-size:12px;margin-top:1px" id="chSt"></div>
+              </div>
+              <!-- SD indicator -->
+              <div id="sdIndicator" style="display:none">
+                <div class="sd-badge">💣 <span id="sdLabel"></span></div>
+              </div>
+              <span style="color:rgba(20,184,166,.4);font-size:13px">🔒</span>
+            </div>
+            <!-- Presidential Pinned Warning (shown only when chatting with owner) -->
+            <div class="pres-warning" id="presWarning" style="display:none">
+              <span class="pres-warning-icon">🦅</span>
+              <div class="pres-warning-body">
+                <div class="pres-warning-title">⚠️ تحذير رسمي من ITOP</div>
+                <div class="pres-warning-txt">أنت تتحدث مع <strong>مالك التطبيق</strong>. يجب الالتزام التام بالاحترام.
+                  أي إساءة أو تجاوز سيؤدي إلى الحظر الفوري والنهائي من المنصة. 🛡️</div>
+              </div>
+            </div>
+            <div class="rply-bar" id="rplyBar">
+              <div style="width:3px;height:100%;background:var(--p);border-radius:2px;flex-shrink:0"></div>
+              <div class="rply-cnt" id="rplyCnt"></div>
+              <button style="background:none;border:none;color:var(--txt3);cursor:pointer;font-size:16px"
+                onclick="clrReply()">✕</button>
+            </div>
+            <div class="msgs" id="msgsA"></div>
+            <div class="ia gl" style="position:relative">
+              <div class="epick" id="epick"></div>
+              <div class="img-prev" id="imgPrev">
+                <img id="imgPrevImg" src="" alt="">
+                <div class="img-prev-info">
+                  <div style="font-weight:500;margin-bottom:4px">صورة جاهزة للإرسال</div>
+                  <div id="imgPrevName"></div>
+                </div>
+                <button onclick="clrImg()"
+                  style="background:rgba(239,68,68,.2);border:1px solid rgba(239,68,68,.3);color:#f87171;border-radius:8px;width:28px;height:28px;cursor:pointer;font-size:14px">✕</button>
+              </div>
+              <div class="ia-top">
+                <button class="atog" id="aBtn" onclick="togAnon()">🕶️ مجهول</button>
+                <button class="iab" onclick="togEmoji()" title="إيموجي">😊</button>
+                <button class="iab" onclick="document.getElementById('imgFile').click()" title="صورة">📎</button>
+                <input type="file" id="imgFile" accept="image/*" style="display:none" onchange="onImgSelect(event)">
+              </div>
+              <div class="ir">
+                <textarea class="mi" id="mInp" placeholder="اكتب رسالة..." rows="1" onkeydown="hKey(event)"
+                  oninput="hTyp();autoRz(this)"></textarea>
+                <button class="recb" id="recBtn" onclick="togRec()" title="تسجيل صوتي">🎙️</button>
+                <button class="sndb" id="sndB" onclick="sndMsg()">➤</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /pg-chat -->
+
+      <!-- ══════════════════ SETTINGS ══════════════════ -->
+      <div class="pg" id="pg-sets">
+        <div class="sets-hd">
+          <button onclick="navTo('chat')"
+            style="background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--txt2);cursor:pointer;width:36px;height:36px;border-radius:12px;font-size:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0">←</button>
+          <h2>إعدادات الحساب</h2>
+        </div>
+        <div class="sets-body">
+
+          <!-- Profile Card -->
+          <div class="gl sets-sec">
+            <div class="sets-av-sec">
+              <div style="position:relative;display:inline-block">
+                <div class="av av-lg" id="setsAv"
+                  style="box-shadow:0 8px 28px rgba(20,184,166,.25);cursor:pointer;width:80px;height:80px;font-size:26px"
+                  onclick="document.getElementById('profFile').click()"></div>
+                <div class="sets-av-edit" onclick="document.getElementById('profFile').click()">📷</div>
+              </div>
+              <input type="file" id="profFile" accept="image/*" style="display:none" onchange="updProfImg(event)">
+              <div style="text-align:center">
+                <div id="setsNm" style="font-size:18px;font-weight:700;margin-bottom:4px"></div>
+                <div id="setsPh" style="font-size:12px;color:var(--txt2)" dir="ltr"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Personal Info -->
+          <div
+            style="font-size:11px;color:var(--txt3);font-weight:600;text-transform:uppercase;letter-spacing:.8px;padding:0 4px 6px">
+            المعلومات الشخصية</div>
+          <div class="gl sets-sec">
+            <div class="si" onclick="editNm()">
+              <div class="sil">
+                <div class="si-ic" style="background:rgba(20,184,166,.15)">✏️</div>
+                <div>
+                  <div class="si-lbl">تغيير الاسم</div>
+                  <div class="si-sub" id="curNm"></div>
+                </div>
+              </div>
+              <span style="color:var(--txt3);font-size:18px">›</span>
+            </div>
+            <div class="si" onclick="editBio()">
+              <div class="sil">
+                <div class="si-ic" style="background:rgba(139,92,246,.15)">📝</div>
+                <div>
+                  <div class="si-lbl">تعديل النبذة</div>
+                  <div class="si-sub" id="curBio"></div>
+                </div>
+              </div>
+              <span style="color:var(--txt3);font-size:18px">›</span>
+            </div>
+            <div class="si" onclick="editPh()">
+              <div class="sil">
+                <div class="si-ic" style="background:rgba(20,184,166,.15)">📱</div>
+                <div>
+                  <div class="si-lbl">تغيير الرقم</div>
+                  <div class="si-sub" id="curPh"></div>
+                </div>
+              </div>
+              <span style="color:var(--txt3);font-size:18px">›</span>
+            </div>
+            <div class="si" onclick="document.getElementById('profFile').click()">
+              <div class="sil">
+                <div class="si-ic" style="background:rgba(245,158,11,.15)">🖼️</div>
+                <div>
+                  <div class="si-lbl">تغيير الصورة</div>
+                  <div class="si-sub">اضغط لرفع صورة جديدة</div>
+                </div>
+              </div>
+              <span style="color:var(--txt3);font-size:18px">›</span>
+            </div>
+          </div>
+
+          <!-- Preferences -->
+          <div
+            style="font-size:11px;color:var(--txt3);font-weight:600;text-transform:uppercase;letter-spacing:.8px;padding:0 4px 6px">
+            التفضيلات</div>
+          <div class="gl sets-sec">
+            <div class="si">
+              <div class="sil">
+                <div class="si-ic" style="background:rgba(99,102,241,.15)">🌙</div>
+                <div>
+                  <div class="si-lbl">الوضع الليلي</div>
+                  <div class="si-sub">مفعّل دائماً</div>
+                </div>
+              </div>
+              <div class="tgl on" style="cursor:default"></div>
+            </div>
+            <div class="si" onclick="togNotifs()">
+              <div class="sil">
+                <div class="si-ic" style="background:rgba(245,158,11,.15)">🔔</div>
+                <div>
+                  <div class="si-lbl">إشعارات الرسائل</div>
+                  <div class="si-sub" id="notifSub">مفعّلة</div>
+                </div>
+              </div>
+              <div class="tgl on" id="notifTgl"></div>
+            </div>
+          </div>
+
+          <!-- Self Destruct -->
+          <div
+            style="font-size:11px;color:var(--txt3);font-weight:600;text-transform:uppercase;letter-spacing:.8px;padding:0 4px 6px">
+            الخصوصية والأمان</div>
+          <div class="gl sets-sec">
+            <div class="si" onclick="togSD()">
+              <div class="sil">
+                <div class="si-ic" style="background:rgba(239,68,68,.15)">💣</div>
+                <div>
+                  <div class="si-lbl">التدمير التلقائي للرسائل</div>
+                  <div class="si-sub" id="sdSub">معطّل — يحذف رسائلك تلقائياً</div>
+                </div>
+              </div>
+              <div class="tgl" id="sdTgl"></div>
+            </div>
+            <div id="sdTimerWrap" style="display:none;padding:12px 16px;border-top:1px solid var(--border)">
+              <div style="font-size:12px;color:var(--txt2);margin-bottom:10px">⏱️ تُحذف رسائلك تلقائياً بعد:</div>
+              <select class="sd-select" id="sdTimer" onchange="setSdTimer(this.value)" style="width:100%">
+                <option value="60">دقيقة واحدة ⏱️</option>
+                <option value="300">5 دقائق</option>
+                <option value="600">10 دقائق</option>
+                <option value="1800">30 دقيقة</option>
+                <option value="3600">ساعة واحدة</option>
+                <option value="21600">6 ساعات</option>
+                <option value="86400" selected>يوم كامل</option>
+                <option value="604800">أسبوع</option>
+              </select>
+            </div>
+            <div style="padding:14px 16px;border-top:1px solid var(--border)">
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+                <div class="si-ic" style="background:rgba(20,184,166,.15)">🔐</div>
+                <div>
+                  <div class="si-lbl">تشفير البيانات</div>
+                  <div class="si-sub">RSA-OAEP 2048-bit معمّاة</div>
+                </div>
+              </div>
+              <p style="font-size:12px;color:var(--txt2);line-height:1.6;margin-bottom:12px">رسائلك مشفرة بالكامل على
+                جهازك. المفتاح الخاص يبقى عندك فقط.</p>
+              <button class="btn" style="background:rgba(255,255,255,.07);box-shadow:none;font-size:13px"
+                onclick="expK()">📥 تصدير مفتاح الأمان</button>
+              <p style="font-size:10px;color:var(--red);text-align:center;margin-top:10px">⚠️ فقدان المفتاح = فقدان
+                رسائلك القديمة نهائياً</p>
+            </div>
+          </div>
+
+          <!-- Verification Request -->
+          <div class="gl sets-sec">
+            <div class="si" onclick="toast('سيتم التواصل معك من الإدارة قريباً 📩','i')">
+              <div class="sil">
+                <div class="si-ic" style="background:rgba(59,130,246,.15)">🛡️</div>
+                <div>
+                  <div class="si-lbl">طلب توثيق الحساب</div>
+                  <div class="si-sub">للحصول على العلامة الزرقاء ✓</div>
+                </div>
+              </div>
+              <span style="color:var(--txt3);font-size:18px">›</span>
+            </div>
+          </div>
+
+          <!-- Elite (verified users only) -->
+          <div class="gl sets-sec" id="elite-toggle" style="display:none">
+            <div class="si" onclick="togEliteControls()">
+              <div class="sil">
+                <div class="si-ic" style="background:rgba(245,158,11,.15)">👑</div>
+                <div>
+                  <div class="si-lbl">إعدادات النخبة</div>
+                  <div class="si-sub">الرد التلقائي والسمات الملكية</div>
+                </div>
+              </div>
+              <span style="color:var(--txt3);font-size:18px">›</span>
+            </div>
+          </div>
+
+          <!-- Logout -->
+          <div class="gl sets-sec">
+            <div class="si" onclick="doLogout()">
+              <div class="sil">
+                <div class="si-ic" style="background:rgba(239,68,68,.15)">🚪</div>
+                <div>
+                  <div class="si-lbl" style="color:#f87171">تسجيل الخروج</div>
+                  <div class="si-sub">ستحتاج كود التحقق للدخول مرة أخرى</div>
+                </div>
+              </div>
+              <span style="color:#f87171;font-size:18px">›</span>
+            </div>
+          </div>
+
+          <div style="text-align:center;color:var(--txt3);font-size:11px;padding:8px">ITOP v3.0 — مشفر بالكامل 🔒
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════ ADMIN ══════════════════ -->
+      <div class="pg" id="pg-admin">
+        <div class="adm-hd">
+          <div class="adm-hd-l">
+            <div class="adm-logo">🛡️</div>
+            <div>
+              <div style="font-size:14px;font-weight:800">لوحة الأدمن</div>
+              <div
+                style="background:linear-gradient(135deg,rgba(239,68,68,.3),rgba(245,158,11,.2));border:1px solid rgba(239,68,68,.4);border-radius:8px;padding:2px 8px;font-size:10px;color:#fca5a5;display:inline-block;margin-top:3px;font-weight:700">
+                ITOP CONTROL CENTER</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button onclick="ldAd()"
+              style="background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--txt2);cursor:pointer;width:32px;height:32px;border-radius:10px;font-size:16px;display:flex;align-items:center;justify-content:center"
+              title="تحديث">↻</button>
+            <button onclick="navTo('chat')"
+              style="background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--txt2);cursor:pointer;font-size:12px;font-family:inherit;padding:6px 12px;border-radius:10px">←
+              رجوع</button>
+          </div>
+        </div>
+        <div class="adm-body">
+          <div class="adm-stats" id="adStats"></div>
+          <div class="adm-tabs" id="admTabs">
+            <button class="at act" onclick="adTab('ov',this)">📊 نظرة عامة</button>
+            <button class="at" onclick="adTab('us',this)">👥 المستخدمون</button>
+            <button class="at" onclick="adTab('ot',this)">🔑 OTP</button>
+            <button class="at" onclick="adTab('ms',this)">💬 الرسائل</button>
+            <button class="at" onclick="adTab('cv',this)">🗂️ المحادثات</button>
+            <button class="at" onclick="adTab('pf',this)">⚙️ حسابي</button>
+          </div>
+          <div id="adCnt"></div>
+        </div>
+      </div>
+
+      <!-- Persistent Bottom Nav -->
+      <div class="bnav gl" id="main-nav" style="display:none">
+        <button class="nb act" id="nb-chat" onclick="navTo('chat')"><span class="ni">💬</span><span>الشات</span>
+          <div class="nb-dot" id="chat-dot"></div>
+        </button>
+        <button class="nb" id="nb-sets" onclick="navTo('sets')"><span class="ni">⚙️</span><span>إعداداتي</span></button>
+        <button class="nb" id="nb-admin" style="display:none" onclick="navTo('admin')"><span
+            class="ni">🛡️</span><span>الأدمن</span></button>
+      </div>
+
+      <!-- ══════════════════ MODALS ══════════════════ -->
+      <div class="mov" id="ncMod" onclick="if(event.target===this)cMod('ncMod')">
+        <div class="modal">
+          <div class="mhnd"></div>
+          <div class="mh">محادثة جديدة<button class="xb" onclick="cMod('ncMod')">✕</button></div>
+          <div class="mb">
+            <div style="display:flex;gap:8px">
+              <input class="inp" id="srchPh" type="tel" placeholder="+201234567890" dir="ltr" style="margin:0;flex:1">
+              <button class="btn" style="width:auto;padding:0 16px;margin:0;font-size:13px"
+                onclick="srchU()">بحث</button>
+            </div>
+            <p style="color:var(--txt3);font-size:12px;margin-top:8px">ابحث برقم الهاتف مع رمز الدولة</p>
+            <div id="srchRes"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mov" id="editBioMod" onclick="if(event.target===this)cMod('editBioMod')">
+        <div class="modal">
+          <div class="mhnd"></div>
+          <div class="mh">تعديل النبذة<button class="xb" onclick="cMod('editBioMod')">✕</button></div>
+          <div class="mb">
+            <textarea class="inp" id="newBioInp" placeholder="اكتب نبذة عنك..." maxlength="150" rows="4"
+              style="font-family:inherit;font-size:13px"></textarea>
+            <button class="btn" onclick="saveBio()">حفظ النبذة</button>
+          </div>
+        </div>
+      </div>
+      <div class="mov" id="editNmMod" onclick="if(event.target===this)cMod('editNmMod')">
+        <div class="modal">
+          <div class="mhnd"></div>
+          <div class="mh">تغيير الاسم<button class="xb" onclick="cMod('editNmMod')">✕</button></div>
+          <div class="mb">
+            <input class="inp" id="newNmInp" type="text" placeholder="الاسم الجديد" maxlength="30">
+            <button class="btn" onclick="saveNm()">حفظ</button>
+          </div>
+        </div>
+      </div>
+      <div class="mov" id="editPhMod" onclick="if(event.target===this)cMod('editPhMod')">
+        <div class="modal">
+          <div class="mhnd"></div>
+          <div class="mh">تغيير رقم الهاتف<button class="xb" onclick="cMod('editPhMod')">✕</button></div>
+          <div class="mb">
+            <p style="font-size:12px;color:var(--txt2);margin-bottom:12px">أدخل رقم الهاتف الجديد مع رمز الدولة. سيتم
+              تحديث الرقم فوراً.</p>
+            <input class="inp" id="newPhInp" type="tel" placeholder="+201234567890" dir="ltr">
+            <button class="btn" onclick="savePh()">تحديث الرقم ✓</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="mov" id="eliteMod" onclick="if(event.target===this)cMod('eliteMod')">
+        <div class="modal">
+          <div class="mhnd"></div>
+          <div class="mh">إعدادات النخبة<button class="xb" onclick="cMod('eliteMod')">✕</button></div>
+          <div class="mb">
+            <div style="margin-bottom:20px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                <div>
+                  <div style="font-size:14px;font-weight:600">تفعيل الرد التلقائي</div>
+                  <div style="font-size:11px;color:var(--txt2)">يظهر للآخرين كرسالة إدارية</div>
+                </div>
+                <div class="tgl" id="arTgl" onclick="togAR()"></div>
+              </div>
+              <div id="arWrap" style="display:none;margin-bottom:12px">
+                <div style="font-size:12px;color:var(--txt2);margin-bottom:8px">رسالة الرد التلقائي:</div>
+                <textarea class="inp" id="arText" placeholder="مثلاً: مرحباً بك في إدارة ITOP..." rows="3"
+                  style="font-size:13px;font-family:inherit"></textarea>
+              </div>
+              <hr style="border:none;border-top:1px solid var(--border);margin:15px 0">
+              <div style="font-size:14px;font-weight:600;margin-bottom:12px">لون السمة (Theme)</div>
+              <div style="display:flex;gap:10px;justify-content:center">
+                <div class="clr-dot" style="background:#14b8a6" onclick="setAccent('#14b8a6')"></div>
+                <div class="clr-dot" style="background:#8b5cf6" onclick="setAccent('#8b5cf6')"></div>
+                <div class="clr-dot" style="background:#f59e0b" onclick="setAccent('#f59e0b')"></div>
+                <div class="clr-dot" style="background:#ec4899" onclick="setAccent('#ec4899')"></div>
+                <div class="clr-dot" style="background:#6366f1" onclick="setAccent('#6366f1')"></div>
+              </div>
+            </div>
+            <button class="btn shimmer" onclick="saveElite()">حفظ الإعدادات 👑</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mov" id="profMod" onclick="if(event.target===this)cMod('profMod')">
+      <div class="modal">
+        <div class="mhnd"></div>
+        <div class="mh">الملف الشخصي<button class="xb" onclick="cMod('profMod')">✕</button></div>
+        <div class="mb">
+          <div class="prof-hd">
+            <div class="prof-av" id="pModAv"></div>
+            <div class="prof-nm" id="pModNm"></div>
+            <div class="prof-ph" id="pModPh" dir="ltr"></div>
+            <div class="prof-bio" id="pModBio"></div>
+            <div class="prof-stat">
+              <div class="ps-item">
+                <div class="ps-v">ITOP</div>
+                <div class="ps-l">عضو</div>
+              </div>
+              <div class="ps-item">
+                <div class="ps-v">نشط</div>
+                <div class="ps-l">الحالة</div>
+              </div>
+            </div>
+            <button class="btn" style="margin-top:24px" onclick="cMod('profMod');startConvFromProf()">إرسال
+              رسالة</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /scr -->
+  </div><!-- /phone -->
+  </div><!-- /app -->
+
+  <script>
+    // ══════════════════════════════════════════════════
+    // CONFIG
+    // ══════════════════════════════════════════════════
+    const SURL = 'https://phlxrmiwfodnilcjkuty.supabase.co'
+    const SKEY = 'sb_publishable_uhgleyF4aDnfxPvU3PxEOQ_tAfvxCn-'
+    const SESS = 'itop_v3'
+    const DEV_ID = '6e52e624-7061-4b83-ad28-e58d60252cfa'
+    const DEV_TOOLTIP = '⚡ مطور ITOP — صانع هذا التطبيق المشفر'
+
+    const sb = supabase.createClient(SURL, SKEY)
+
+    // ══════════════════════════════════════════════════
+    // STATE
+    // ══════════════════════════════════════════════════
+    let ME = null, aConv = null, anon = false, tpTO = null, rtCh = null, allCv = [], replyTo = null
+    let notifsOn = true, sdEnabled = false, sdSeconds = 86400
+    let isRecording = false, mediaRec = null, audioChunks = [], recTO = null
+    let pendingImg = null, pendingImgFile = null
+    let chatSyncInt = null, lastMsgSyncAt = null
+    let renderedMsgIds = new Set(), lastRealtimeEvtAt = 0
+
+    // ══════════════════════════════════════════════════
+    // HELPERS
+    // ══════════════════════════════════════════════════
+    function toast(msg, t = 'i') {
+      const el = document.createElement('div'); el.className = 'toast'
+      el.style.borderColor = t === 'e' ? 'rgba(239,68,68,.4)' : t === 's' ? 'rgba(20,184,166,.4)' : 'var(--border2)'
+      el.textContent = msg
+      document.getElementById('twrap').appendChild(el)
+      setTimeout(() => el.classList.add('show'), 10)
+      setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300) }, 3500)
+    }
+    function fmtT(d) {
+      try {
+        const dt = new Date(d), nw = new Date(), df = nw - dt
+        if (df < 60000) return 'الآن'
+        if (df < 3600000) return `${Math.floor(df / 60000)}د`
+        if (df < 86400000) return dt.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
+        return dt.toLocaleDateString('ar-EG', { month: 'short', day: 'numeric' })
+      } catch { return '' }
+    }
+    function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }
+    function autoRz(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 120) + 'px' }
+    const isAdmin = () => ME?.id === DEV_ID
+    const isDev = (uid) => uid === DEV_ID
+
+    // ══════════════════════════════════════════════════
+    // PAGES
+    // ══════════════════════════════════════════════════
+    function pg(id) {
+      document.querySelectorAll('.pg').forEach(p => { p.classList.remove('show'); p.style.display = '' })
+      const el = document.getElementById('pg-' + id); el.style.display = 'flex'; el.classList.add('show')
+    }
+    function fillSets() {
+      mkAv(document.getElementById('setsAv'), ME, 'lg', false)
+      document.getElementById('setsNm').innerHTML = esc(ME.username) + bdg(ME.verification_badge, ME.id, ME.phone)
+      document.getElementById('setsPh').textContent = ME.phone
+      document.getElementById('curNm').textContent = ME.username
+      document.getElementById('curPh').textContent = ME.phone
+      try { document.getElementById('curBio').textContent = ME.bio || 'لا توجد نبذة' } catch (e) { }
+
+      const el = document.getElementById('elite-toggle')
+      if (el) {
+        el.style.display = (ME.verification_badge && ME.verification_badge !== 'none') ? '' : 'none'
+      }
+    }
+    function navTo(id) {
+      const page = id === 'sets' ? 'sets' : id === 'admin' ? 'admin' : 'chat'
+      pg(page)
+      document.querySelectorAll('.nb').forEach(b => b.classList.remove('act'))
+      if (id === 'chat') document.getElementById('nb-chat')?.classList.add('act')
+      if (id === 'sets') { document.getElementById('nb-sets')?.classList.add('act'); fillSets() }
+      if (id === 'admin') { document.getElementById('nb-admin')?.classList.add('act'); ldAd() }
+    }
+
+    // ══════════════════════════════════════════════════
+    // CRYPTO
+    // ══════════════════════════════════════════════════
+    const RSA = { name: 'RSA-OAEP', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' }
+    function odb() { return new Promise((r, j) => { const q = indexedDB.open('itop_k3', 1); q.onupgradeneeded = e => e.target.result.createObjectStore('k', { keyPath: 'id' }); q.onsuccess = () => r(q.result); q.onerror = () => j(q.error) }) }
+    async function svK(p, v) { const d = await odb(); return new Promise((r, j) => { const t = d.transaction('k', 'readwrite'); t.objectStore('k').put({ id: 'm', p, v }).onsuccess = r; t.onerror = () => j(t.error) }) }
+    async function ldK() { const d = await odb(); return new Promise((r, j) => { const t = d.transaction('k', 'readonly'), q = t.objectStore('k').get('m'); q.onsuccess = () => r(q.result || null); q.onerror = () => j(q.error) }) }
+    async function clK() { const d = await odb(); return new Promise((r, j) => { const t = d.transaction('k', 'readwrite'); t.objectStore('k').delete('m').onsuccess = r; t.onerror = () => j(t.error) }) }
+    async function genK() { const kp = await crypto.subtle.generateKey(RSA, true, ['encrypt', 'decrypt']); const pub = await crypto.subtle.exportKey('jwk', kp.publicKey), priv = await crypto.subtle.exportKey('jwk', kp.privateKey); await svK(pub, priv); return JSON.stringify(pub) }
+    async function hasK() { return !!(await ldK()) }
+    function b64e(b) { return btoa(String.fromCharCode(...new Uint8Array(b))) }
+    function b64d(s) { const b = atob(s), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++)u[i] = b.charCodeAt(i); return u.buffer }
+    async function encFor(txt, jwk) { const k = await crypto.subtle.importKey('jwk', JSON.parse(jwk), RSA, false, ['encrypt']); return b64e(await crypto.subtle.encrypt({ name: 'RSA-OAEP' }, k, new TextEncoder().encode(txt))) }
+    async function decMsg(c) { const s = await ldK(); if (!s) throw new Error('no key'); const k = await crypto.subtle.importKey('jwk', s.v, RSA, false, ['decrypt']); return new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'RSA-OAEP' }, k, b64d(c))) }
+    async function fprt() { const d = [navigator.userAgent, navigator.language, screen.width + 'x' + screen.height, new Date().getTimezoneOffset()].join('|'); return b64e(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(d))).slice(0, 32) }
+
+    // ══════════════════════════════════════════════════
+    // HYBRID ENCRYPTION (AES + RSA)
+    // ══════════════════════════════════════════════════
+    const AES = {
+      gen: () => crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']),
+      enc: async (key, data) => {
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const buf = new TextEncoder().encode(data);
+        const enc = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, buf);
+        return { d: b64e(enc), i: b64e(iv) };
+      },
+      dec: async (key, encB64, ivB64) => {
+        const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64d(ivB64) }, key, b64d(encB64));
+        return new TextDecoder().decode(dec);
+      }
+    };
+
+    async function hybridEnc(txt, pubJwk) {
+      const k = await AES.gen();
+      const rawK = await crypto.subtle.exportKey('jwk', k);
+      const payload = await AES.enc(k, txt);
+      const encKey = await encFor(JSON.stringify(rawK), pubJwk);
+      return JSON.stringify({ k: encKey, i: payload.i, d: payload.d });
+    }
+
+    async function hybridDec(jsonStr) {
+      try {
+        const j = JSON.parse(jsonStr);
+        if (!j.k || !j.d) return await decMsg(jsonStr); // Fallback to old RSA-only for legacy messages
+        const rawK = await decMsg(j.k);
+        const k = await crypto.subtle.importKey('jwk', JSON.parse(rawK), { name: 'AES-GCM' }, false, ['decrypt']);
+        return await AES.dec(k, j.d, j.i);
+      } catch (e) {
+        // If JSON parsing fails, it's likely an old RSA-only message
+        try { return await decMsg(jsonStr); } catch { throw e; }
+      }
+    }
+
+    // ══════════════════════════════════════════════════
+    // AVATAR
+    // ══════════════════════════════════════════════════
+    const AVC = ['#2563eb', '#059669', '#7c3aed', '#e11d48', '#d97706', '#0891b2', '#4f46e5', '#db2777']
+    function avClr(n) { return AVC[(n || '?').charCodeAt(0) % AVC.length] }
+    function mkAv(el, u, sz = 'sm', dot = true) {
+      if (!el) return
+      el.className = `av av-${sz} shimmer`
+      el.style.cursor = 'pointer'
+      el.onclick = (e) => { e.stopPropagation(); if (u?.id) showProfile(u.id) }
+      const inn = document.createElement('div'); inn.className = 'av-inner'; inn.style.background = avClr(u?.username)
+      if (u?.profile_image_url) { const img = document.createElement('img'); img.src = u.profile_image_url; inn.appendChild(img) }
+      else inn.textContent = (u?.username || '??').slice(0, 2).toUpperCase()
+      el.innerHTML = ''; el.appendChild(inn)
+      if (dot && u?.is_online !== undefined) { const s = document.createElement('span'); s.className = `odot ${u.is_online ? 'on' : 'off'}`; el.appendChild(s) }
+    }
+
+    async function showProfile(uid) {
+      oMod('profMod');
+      const d = document.getElementById('pModAv'); d.innerHTML = '<div class="sp2"></div>'
+      document.getElementById('pModNm').textContent = 'جاري التحميل...'
+      document.getElementById('pModPh').textContent = ''
+      document.getElementById('pModBio').textContent = ''
+
+      try {
+        const { data: u } = await sb.from('users').select('*').eq('id', uid).single()
+        if (!u) return
+        window._tempProf = u
+        mkAv(d, u, 'lg', false)
+        const isPres = u.phone === '1'
+        const isMe = u.id === ME?.id
+
+        if (isPres) {
+          d.closest('.modal').classList.add('pres-profile')
+          // Inject Elite decorations
+          d.innerHTML += `
+            <div class="pres-wings">🦅 🦅</div>
+            <div class="pres-crown">👑</div>
+            <div class="pres-rocket-l">🚀</div>
+            <div class="pres-rocket-r">🚀</div>
+          `
+        } else {
+          d.closest('.modal').classList.remove('pres-profile')
+        }
+
+        document.getElementById('pModNm').innerHTML = esc(u.username) + bdg(u.verification_badge, u.id, u.phone)
+
+        const phEl = document.getElementById('pModPh')
+        if (isPres && !isMe) {
+          phEl.textContent = 'الرقم محمي بأعلى درجات التشفير 🛡️'
+          phEl.className = 'prof-ph pres-ph-hidden'
+        } else {
+          phEl.textContent = u.phone || ''
+          phEl.className = 'prof-ph'
+        }
+
+        document.getElementById('pModBio').textContent = u.bio || 'لا توجد نبذة تعريفية.'
+      } catch (e) { toast('خطأ في تحميل البيانات', 'e') }
+    }
+
+    function startConvFromProf() {
+      if (!window._tempProf) return
+      window._fu = window._tempProf
+      strtW()
+    }
+
+    // ══════════════════════════════════════════════════
+    // BADGES & ROLES
+    // ══════════════════════════════════════════════════
+    const BC = { blue: '#3b82f6', gold: '#eab308', purple: '#a855f7', orange: '#f97316', red: '#ef4444' }
+    const BL = {
+      none: '',
+      blue: 'موثق - مشهور',
+      gold: 'عضو ذهبي - قيادة',
+      purple: 'جهة حكومية - رسمي',
+      orange: 'تاجر - موثق للمبيعات',
+      red: 'فريق الإدارة والتحكم'
+    }
+
+    function bdg(badge, uid, phone) {
+      let res = ''
+      if (phone === '1') {
+        res += `<span class="pres-label">OWNER OF ITOP</span>`
+      }
+
+      if (isDev(uid)) {
+        const gid = 'v_' + String(uid || 'dev').replace(/[^a-zA-Z0-9_-]/g, '_')
+        res += `<span class="bdg-vip" title="${DEV_TOOLTIP}">
+      <svg width="20" height="20" viewBox="0 0 24 24">
+        <defs>
+          <linearGradient id="${gid}" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#ec4899"><animate attributeName="stop-color" values="#ec4899;#a855f7;#ec4899" dur="3s" repeatCount="indefinite"/></stop>
+            <stop offset="100%" style="stop-color:#8b5cf6"><animate attributeName="stop-color" values="#8b5cf6;#3b82f6;#8b5cf6" dur="3s" repeatCount="indefinite"/></stop>
+          </linearGradient>
+        </defs>
+        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" fill="url(#${gid})" stroke="white" stroke-width="1"/>
+      </svg>
+    </span>`
+        return res
+      }
+      if (!badge || badge === 'none') return res
+
+      const c = BC[badge] || '#34d399'
+      res += `<span class="bdg" title="${BL[badge] || 'موثق'}"><svg width="15" height="15" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="${c}" opacity=".15"/><circle cx="12" cy="12" r="10" fill="${c}"/><path d="M7.5 12.5L10.5 15.5L16.5 9" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`
+      return res
+    }
+
+    // ══════════════════════════════════════════════════
+    // EMOJI
+    // ══════════════════════════════════════════════════
+    const EMJS = ['😀', '😂', '🥰', '😍', '🤔', '😎', '🥳', '😭', '😡', '🤣', '👍', '👎', '❤️', '🔥', '✨', '🎉', '🙏', '💪', '👏', '🤝', '😊', '😉', '🫡', '💀', '👀', '🎊', '🌟', '💡', '🚀', '✅', '❌', '⚠️', '💬', '🔐', '🕶️', '🌙', '☀️', '⚡', '💎', '🏆', '🎯', '💫', '🌈', '🎵', '🍀', '🦋', '🌸', '🎭', '🔮', '🛡️']
+    function buildEmoji() {
+      const p = document.getElementById('epick'); if (p.children.length) return
+      const g = document.createElement('div'); g.className = 'egrid'
+      EMJS.forEach(e => { const b = document.createElement('button'); b.className = 'ebtn'; b.textContent = e; b.onclick = () => { insEmoji(e); togEmoji() }; g.appendChild(b) })
+      p.appendChild(g)
+    }
+    function togEmoji() { document.getElementById('epick').classList.toggle('show') }
+    function insEmoji(e) { const i = document.getElementById('mInp'); const s = i.selectionStart; i.value = i.value.slice(0, s) + e + i.value.slice(i.selectionEnd); i.selectionStart = i.selectionEnd = s + e.length; i.focus() }
+    document.addEventListener('click', e => { const p = document.getElementById('epick'); if (p?.classList.contains('show') && !p.contains(e.target) && !e.target.closest('.iab')) p.classList.remove('show') })
+
+    // ══════════════════════════════════════════════════
+    // IMAGE HANDLING
+    // ══════════════════════════════════════════════════
+    function onImgSelect(ev) {
+      const f = ev.target.files[0]; if (!f) return
+      if (f.size > 5 * 1024 * 1024) { toast('الصورة أكبر من 5MB', 'e'); return }
+      pendingImgFile = f
+      const reader = new FileReader()
+      reader.onload = e => {
+        pendingImg = e.target.result
+        document.getElementById('imgPrevImg').src = pendingImg
+        document.getElementById('imgPrevName').textContent = f.name
+        document.getElementById('imgPrev').classList.add('show')
+      }
+      reader.readAsDataURL(f)
+      ev.target.value = ''
+    }
+    function clrImg() { pendingImg = null; pendingImgFile = null; document.getElementById('imgPrev').classList.remove('show') }
+
+    // ══════════════════════════════════════════════════
+    // AUDIO RECORDING
+    // ══════════════════════════════════════════════════
+    async function togRec() {
+      if (!isRecording) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+          audioChunks = []
+          const pref = 'audio/webm;codecs=opus'
+          const recOpts = {}
+          if (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(pref)) recOpts.mimeType = pref
+          recOpts.audioBitsPerSecond = 48000
+          mediaRec = new MediaRecorder(stream, recOpts)
+          mediaRec.ondataavailable = e => audioChunks.push(e.data)
+          mediaRec.onstop = async () => {
+            const typ = mediaRec.mimeType || 'audio/webm'
+            const blob = new Blob(audioChunks, { type: typ })
+            stream.getTracks().forEach(t => t.stop())
+            await sendAudioMsg(blob)
+          }
+          mediaRec.start()
+          isRecording = true
+          document.getElementById('recBtn').classList.add('recording')
+          document.getElementById('recBtn').textContent = '⏹️'
+          toast('جاري التسجيل... اضغط مرة أخرى للإرسال', 'i')
+          recTO = setTimeout(() => { if (isRecording) togRec() }, 30000)
+        } catch { toast('لم يتم منح إذن الميكروفون', 'e') }
+      } else {
+        clearTimeout(recTO)
+        mediaRec?.stop()
+        isRecording = false
+        document.getElementById('recBtn').classList.remove('recording')
+        document.getElementById('recBtn').textContent = '🎙️'
+      }
+    }
+
+    async function sendAudioMsg(blob) {
+      if (!aConv) return
+      if (blob.size > 1500 * 1024) {
+        toast('حجم الريكورد كبير جداً. حاول رسالة أقصر أو جودة أقل', 'e')
+        return
+      }
+      const o = aConv.o
+      if (!o.public_key) { toast('لا يوجد مفتاح تشفير للمستخدم', 'e'); return }
+      try {
+        // Convert to base64
+        const reader = new FileReader()
+        reader.onload = async e => {
+          const b64 = e.target.result
+          const label = '[AUDIO]' + b64
+          const { data: me } = await sb.from('users').select('public_key').eq('id', ME.id).single()
+          const [fr, fs] = await Promise.all([hybridEnc(label, o.public_key), hybridEnc(label, me.public_key)])
+          let cid = aConv.id
+          if (!cid) { const { data: nc } = await sb.from('conversations').insert({ participant_1: ME.id, participant_2: o.id }).select().single(); cid = nc.id; aConv = { ...aConv, id: cid } }
+          const md = { conversation_id: cid, sender_id: ME.id, encrypted_for_receiver: fr, encrypted_for_sender: fs, is_anonymous: false, msg_type: 'audio' }
+          if (sdEnabled) md.expires_at = new Date(Date.now() + sdSeconds * 1000).toISOString()
+          await sb.from('messages').insert(md)
+          checkAutoReply(o)
+          toast('تم إرسال الرسالة الصوتية ✓', 's')
+        }
+        reader.readAsDataURL(blob)
+      } catch (e) { toast('فشل إرسال الصوت', 'e') }
+    }
+
+    async function checkAutoReply(receiver) {
+      if (!receiver.auto_reply_enabled || !receiver.auto_reply_text) return
+
+      const msg = receiver.auto_reply_text
+
+      setTimeout(() => {
+        // Only show if we are still in this conversation
+        if (aConv && aConv.id && (aConv.participant_1 === receiver.id || aConv.participant_2 === receiver.id)) {
+          const a = document.getElementById('msgsA')
+          const dummy = {
+            id: 'auto_' + Date.now(),
+            sender_id: receiver.id,
+            created_at: new Date().toISOString(),
+            cnt: msg,
+            is_seen: true,
+            is_auto: true
+          }
+          a.appendChild(mkBub(dummy))
+          a.scrollTop = a.scrollHeight
+          toast('رد تلقائي من الحساب الموثق', 'i')
+        }
+      }, 1000)
+    }
+
+    // ══════════════════════════════════════════════════
+    // NOTIFICATIONS
+    // ══════════════════════════════════════════════════
+    async function reqNotifPerm() {
+      if (!('Notification' in window)) return 'unsupported'
+      if (Notification.permission === 'granted') return 'granted'
+      if (Notification.permission === 'denied') return 'denied'
+      const p = await Notification.requestPermission()
+      if (p === 'granted') toast('تم تفعيل الإشعارات ✓', 's')
+      return p
+    }
+    async function togNotifs() {
+      notifsOn = !notifsOn
+      if (notifsOn) {
+        const p = await reqNotifPerm()
+        if (p === 'denied') {
+          notifsOn = false
+          toast('المتصفح منع الإشعارات. فعّلها من إعدادات المتصفح أولاً', 'e')
+        }
+      }
+      document.getElementById('notifTgl').classList.toggle('on', notifsOn)
+      document.getElementById('notifSub').textContent = notifsOn ? 'مفعّلة' : 'معطّلة'
+      localStorage.setItem('itop_notifs_on', String(notifsOn))
+      toast(notifsOn ? 'تم تفعيل الإشعارات ✓' : 'تم تعطيل الإشعارات', 's')
+    }
+    function showNotif(uname, msg, convId, badge) {
+      // Notification Sound (High priority)
+      try {
+        const audio = new Audio('https://raw.githubusercontent.com/sh4n0/Notification-Sounds/master/whatsapp_notification.mp3');
+        audio.play().catch(() => { });
+      } catch (e) { }
+
+      if (!notifsOn) return
+
+      // Browser/Mobile Notification Bar
+      if ('Notification' in window && Notification.permission === 'granted') {
+        const n = new Notification('ITOP — ' + uname, {
+          body: msg.length > 50 ? msg.slice(0, 50) + '...' : msg,
+          icon: 'https://cdn-icons-png.flaticon.com/512/5968/5968771.png',
+          tag: convId,
+          renotify: true
+        })
+        n.onclick = () => { window.focus(); opCv(convId); n.close() }
+        setTimeout(() => n.close(), 6000)
+      }
+
+      // In-app banner (only if not in the active conversation)
+      if (!aConv || aConv.id !== convId) {
+        const ex = document.querySelector('.nban'); if (ex) ex.remove()
+        const ban = document.createElement('div'); ban.className = 'nban gl'
+        ban.innerHTML = `<div class="av av-sm" style="background:${avClr(uname)}">${uname.slice(0, 2).toUpperCase()}</div><div class="nban-info"><div class="nban-nm">${esc(uname)}</div><div class="nban-msg">${esc(msg)}</div></div>`
+        ban.onclick = () => { opCv(convId); ban.remove() }
+        document.getElementById('phone').appendChild(ban)
+        setTimeout(() => ban.remove(), 4000)
+      }
+
+      document.getElementById('chat-dot')?.classList.add('show')
+    }
+
+    // ══════════════════════════════════════════════════
+    // SELF DESTRUCT
+    // ══════════════════════════════════════════════════
+    function togSD() {
+      sdEnabled = !sdEnabled
+      document.getElementById('sdTgl').classList.toggle('on', sdEnabled)
+      document.getElementById('sdSub').textContent = sdEnabled ? `يُحذف بعد ${fmtSec(sdSeconds)}` : 'معطّل'
+      document.getElementById('sdTimerWrap').style.display = sdEnabled ? 'block' : 'none'
+      if (aConv) updSdIndicator()
+      toast(sdEnabled ? `💣 التدمير التلقائي مفعّل (${fmtSec(sdSeconds)})` : 'التدمير التلقائي معطّل', 's')
+    }
+    function setSdTimer(v) { sdSeconds = parseInt(v); document.getElementById('sdSub').textContent = `يُحذف بعد ${fmtSec(sdSeconds)}`; if (aConv) updSdIndicator() }
+    function fmtSec(s) { if (s < 60) return s + 'ث'; if (s < 3600) return Math.floor(s / 60) + 'د'; if (s < 86400) return Math.floor(s / 3600) + 'س'; if (s < 604800) return Math.floor(s / 86400) + ' يوم'; return Math.floor(s / 604800) + ' أسبوع' }
+    function updSdIndicator() {
+      const ind = document.getElementById('sdIndicator')
+      if (sdEnabled) { ind.style.display = 'block'; document.getElementById('sdLabel').textContent = fmtSec(sdSeconds) }
+      else ind.style.display = 'none'
+    }
+    // Auto-delete expired messages
+    async function cleanExpired() {
+      if (!ME) return
+      await sb.from('messages').delete().lt('expires_at', new Date().toISOString()).not('expires_at', 'is', null)
+    }
+    setInterval(cleanExpired, 30000)
+
+    // ══════════════════════════════════════════════════
+    // AUTH
+    // ══════════════════════════════════════════════════
+    function step(n) { ['s1', 's2', 's3'].forEach((s, i) => document.getElementById(s).style.display = i + 1 === n ? 'block' : 'none') }
+
+    async function reqOTP() {
+      const phone = document.getElementById('phInp').value.trim()
+      if (!phone) { toast('أدخل رقم الهاتف', 'e'); return }
+      const b = document.getElementById('rBtn'); b.disabled = true; b.innerHTML = '<span class="sp"></span>'
+      try {
+        const f = await fprt()
+        const { data: u } = await sb.from('users').select('device_fingerprint,is_banned').eq('phone', phone).single()
+        if (u?.is_banned) { toast('هذا الحساب محظور', 'e'); return }
+        if (u?.device_fingerprint && u.device_fingerprint !== f) { toast('هذا الحساب مسجل على جهاز آخر', 'e'); return }
+        const otp = Math.floor(100000 + Math.random() * 900000).toString()
+        const exp = new Date(Date.now() + 10 * 60 * 1000).toISOString()
+        await sb.from('otp_codes').update({ used: true }).eq('phone', phone).eq('used', false)
+        await sb.from('otp_codes').insert({ phone, otp_plain: otp, expires_at: exp, used: false, attempts: 0 })
+        toast('تم الطلب. انتظر كود من المسؤول 📱', 's'); step(2)
+      } catch (e) { toast('حدث خطأ', 'e') }
+      finally { b.disabled = false; b.innerHTML = '<span>طلب كود التحقق</span><span>←</span>' }
+    }
+
+    async function verOTP() {
+      const phone = document.getElementById('phInp').value.trim()
+      const otp = document.getElementById('otpInp').value.trim()
+      if (otp.length !== 6) { toast('أدخل 6 أرقام', 'e'); return }
+      const b = document.getElementById('vBtn'); b.disabled = true; b.innerHTML = '<span class="sp"></span>'
+      try {
+        const f = await fprt()
+        const { data: r } = await sb.from('otp_codes').select('*').eq('phone', phone).eq('used', false).order('created_at', { ascending: false }).limit(1).single()
+        if (!r) { toast('لا يوجد كود نشط', 'e'); return }
+        if (new Date(r.expires_at) < new Date()) { toast('انتهت صلاحية الكود', 'e'); return }
+        if (r.attempts >= 5) { toast('تم تجاوز عدد المحاولات', 'e'); return }
+        if (r.otp_plain !== otp) { await sb.from('otp_codes').update({ attempts: r.attempts + 1 }).eq('id', r.id); toast('الكود غير صحيح', 'e'); return }
+        await sb.from('otp_codes').update({ used: true }).eq('id', r.id)
+        const { data: u } = await sb.from('users').select('*').eq('phone', phone).single()
+        if (u) {
+          let pk = u.public_key; if (!await hasK()) pk = await genK()
+          await sb.from('users').update({ device_fingerprint: f, public_key: pk, is_online: true }).eq('id', u.id)
+          ME = { ...u, device_fingerprint: f, public_key: pk, is_online: true }
+          localStorage.setItem(SESS, JSON.stringify({ id: u.id }))
+          await enterChat()
+        } else step(3)
+      } catch { toast('حدث خطأ', 'e') }
+      finally { b.disabled = false; b.innerHTML = 'تأكيد الكود ✓' }
+    }
+
+    async function mkProf() {
+      const phone = document.getElementById('phInp').value.trim()
+      const un = document.getElementById('unInp').value.trim()
+      if (un.length < 2) { toast('الاسم يجب أن يكون حرفين على الأقل', 'e'); return }
+      const b = document.getElementById('pBtn'); b.disabled = true; b.innerHTML = '<span class="sp"></span>'
+      try {
+        const f = await fprt(), pk = await genK()
+        const { data: u, error } = await sb.from('users').insert({ phone, username: un, device_fingerprint: f, public_key: pk, is_online: true, verification_badge: 'none', is_banned: false }).select().single()
+        if (error) throw error
+        ME = u; localStorage.setItem(SESS, JSON.stringify({ id: u.id })); await enterChat()
+      } catch (e) { toast('خطأ: ' + (e.message || ''), 'e') }
+      finally { b.disabled = false; b.innerHTML = 'ابدأ المحادثة 🚀' }
+    }
+
+    async function enterChat() {
+      // WebView FCM Bridge Registration
+      if (window.AndroidApp && ME) {
+        try {
+          const fcmToken = window.AndroidApp.getFcmToken();
+          if (fcmToken) {
+            sb.from('users').update({ fcm_token: fcmToken }).eq('id', ME.id).then();
+            ME.fcm_token = fcmToken;
+          }
+        } catch(e) { console.error('FCM Error:', e); }
+      }
+
+      // Show admin UI if dev
+      if (isAdmin()) {
+        document.getElementById('nb-admin') && (document.getElementById('nb-admin').style.display = 'flex')
+      }
+      document.getElementById('main-nav').style.display = 'flex'
+      mkAv(document.getElementById('myAv'), ME, 'sm', false)
+      document.getElementById('myNm').innerHTML = ME.username + bdg(ME.verification_badge, ME.id, ME.phone)
+      pg('chat'); navTo('chat')
+      ldCvs()
+      const savedNotif = localStorage.getItem('itop_notifs_on')
+      if (savedNotif !== null) notifsOn = savedNotif === 'true'
+      document.getElementById('notifTgl')?.classList.toggle('on', notifsOn)
+      document.getElementById('notifSub').textContent = notifsOn ? 'مفعّلة' : 'معطّلة'
+      initGlobalSub()
+      document.addEventListener('visibilitychange', () => { if (ME) sb.from('users').update({ is_online: !document.hidden }).eq('id', ME.id) })
+    }
+
+    let globalSub = null
+    async function initGlobalSub() {
+      if (globalSub) sb.removeChannel(globalSub)
+      globalSub = sb.channel('global_msgs')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, async p => {
+          const m = p.new
+          if (m.sender_id === ME.id) return
+
+          // Check if this message belongs to my conversations
+          const isMine = allCv.some(c => c.id === m.conversation_id)
+          if (!isMine) {
+            // Potential new conversation or not loaded yet
+            const { data: cv } = await sb.from('conversations').select('*').eq('id', m.conversation_id).single()
+            if (cv && (cv.participant_1 === ME.id || cv.participant_2 === ME.id)) {
+              await ldCvs() // Reload list
+            } else return
+          }
+
+          // If we are NOT in the active chat window for this message, show notification
+          if (!aConv || aConv.id !== m.conversation_id) {
+            try {
+              const cnt = await hybridDec(m.encrypted_for_receiver)
+              const { data: snd } = await sb.from('users').select('username').eq('id', m.sender_id).single()
+              showNotif(snd.username, cnt, m.conversation_id)
+              ldCvs()
+            } catch (e) { }
+          }
+        })
+        .subscribe()
+    }
+
+    async function doLogout() {
+      if (ME) await sb.from('users').update({ is_online: false, device_fingerprint: null }).eq('id', ME.id)
+      await clK(); localStorage.removeItem(SESS)
+      ME = null; aConv = null; if (rtCh) { sb.removeChannel(rtCh); rtCh = null }
+      stopChatSync()
+      document.getElementById('main-nav').style.display = 'none'
+      pg('auth'); step(1)
+      document.getElementById('phInp').value = ''; document.getElementById('otpInp').value = ''
+    }
+
+    // ══════════════════════════════════════════════════
+    // SETTINGS
+    // ══════════════════════════════════════════════════
+    function fillSets() {
+      try {
+        if (!ME) return
+        const avEl = document.getElementById('setsAv'); if (avEl) mkAv(avEl, ME, 'lg', false)
+        const nmEl = document.getElementById('setsNm'); if (nmEl) nmEl.innerHTML = esc(ME.username) + bdg(ME.verification_badge, ME.id, ME.phone)
+        const phEl = document.getElementById('setsPh'); if (phEl) phEl.textContent = ME.phone || ''
+        const cPhEl = document.getElementById('curPh'); if (cPhEl) cPhEl.textContent = ME.phone || ''
+        const cNmEl = document.getElementById('curNm'); if (cNmEl) cNmEl.textContent = ME.username
+        const cBiEl = document.getElementById('curBio'); if (cBiEl) cBiEl.textContent = ME.bio || 'لا توجد نبذة'
+
+        if (ME.verification_badge !== 'none' || isAdmin()) {
+          const et = document.getElementById('elite-toggle')
+          if (et) et.style.display = 'flex'
+
+          const arTg = document.getElementById('arTgl'); if (arTg) arTg.classList.toggle('on', !!ME.auto_reply_enabled)
+          const arWr = document.getElementById('arWrap'); if (arWr) arWr.style.display = ME.auto_reply_enabled ? 'block' : 'none'
+          const arTx = document.getElementById('arText'); if (arTx) arTx.value = ME.auto_reply_text || ''
+        }
+      } catch (e) { console.error('fillSets error:', e); toast('حدث خطأ أثناء تحميل الإعدادات', 'e') }
+    }
+
+    function setAccent(c) {
+      document.documentElement.style.setProperty('--p', c)
+      document.documentElement.style.setProperty('--p2', c)
+      localStorage.setItem('itop_accent', c)
+      toast('تم تغيير لون السمة بنجاح', 's')
+    }
+    function togEliteControls() { oMod('eliteMod') }
+    function togAR() {
+      const t = document.getElementById('arTgl')
+      t.classList.toggle('on')
+      document.getElementById('arWrap').style.display = t.classList.contains('on') ? 'block' : 'none'
+    }
+    async function saveElite() {
+      const en = document.getElementById('arTgl').classList.contains('on')
+      const txt = document.getElementById('arText').value.trim()
+      await sb.from('users').update({ auto_reply_enabled: en, auto_reply_text: txt }).eq('id', ME.id)
+      ME.auto_reply_enabled = en; ME.auto_reply_text = txt
+      cMod('eliteMod'); toast('تم حفظ الإعدادات الملكية ✓', 's')
+    }
+
+    function editNm() { document.getElementById('newNmInp').value = ME?.username || ''; oMod('editNmMod') }
+    async function saveNm() {
+      const n = document.getElementById('newNmInp').value.trim()
+      if (n.length < 2) { toast('الاسم يجب أن يكون حرفين على الأقل', 'e'); return }
+      await sb.from('users').update({ username: n }).eq('id', ME.id)
+      ME.username = n
+      document.getElementById('myNm').innerHTML = n + bdg(ME.verification_badge, ME.id, ME.phone)
+      document.getElementById('setsNm').innerHTML = n + bdg(ME.verification_badge, ME.id, ME.phone)
+      document.getElementById('curNm').textContent = n
+      cMod('editNmMod'); toast('تم تحديث الاسم ✓', 's')
+    }
+    function editBio() { document.getElementById('newBioInp').value = ME?.bio || ''; oMod('editBioMod') }
+    async function saveBio() {
+      const b = document.getElementById('newBioInp').value.trim()
+      await sb.from('users').update({ bio: b }).eq('id', ME.id)
+      ME.bio = b
+      document.getElementById('curBio').textContent = b || 'لا توجد نبذة'
+      cMod('editBioMod'); toast('تم تحديث النبذة ✓', 's')
+    }
+    function editPh() {
+      const mb = document.querySelector('#editPhMod .mb')
+      mb.innerHTML = `
+        <p style="font-size:12px;color:var(--txt2);margin-bottom:12px">أدخل رقم الهاتف الجديد مع رمز الدولة. سيرسل لك المسؤول كود تحقق (OTP) لتأكيد الرقم.</p>
+        <input class="inp" id="newPhInp" type="tel" placeholder="+201234567890" dir="ltr">
+        <button class="btn" id="reqPhBtn" onclick="reqPhChange()">إرسال كود التحقق</button>
+        <div id="phOtpSec" style="display:none;margin-top:16px;border-top:1px solid var(--border);padding-top:16px">
+          <p style="font-size:12px;color:var(--p);font-weight:bold">تم طلب الكود. أدخله هنا:</p>
+          <input class="inp inp-otp" id="newPhOtp" type="text" placeholder="000000" maxlength="6">
+          <button class="btn" id="verPhBtn" onclick="verPhChange()">تأكيد وتغيير الرقم ✓</button>
+        </div>
+      `
+      oMod('editPhMod')
+    }
+    async function reqPhChange() {
+      const p = document.getElementById('newPhInp').value.trim()
+      if (!p || p.length < 10) { toast('أدخل رقم هاتف صحيح', 'e'); return }
+      if (ME.phone === '1') { toast('لا يمكن تغيير رقم حساب الرئيس', 'e'); return }
+      if (p === ME.phone) { toast('هذا هو رقمك الحالي!', 'e'); return }
+
+      const b = document.getElementById('reqPhBtn'); b.disabled = true; b.textContent = 'جاري الطلب...'
+      try {
+        const { data: u } = await sb.from('users').select('id').eq('phone', p).single()
+        if (u) { toast('الرقم الجديد مستخدم بالفعل بلسان آخر', 'e'); b.disabled = false; b.textContent = 'إرسال كود التحقق'; return }
+
+        const otp = Math.floor(100000 + Math.random() * 900000).toString()
+        const exp = new Date(Date.now() + 10 * 60 * 1000).toISOString()
+        await sb.from('otp_codes').update({ used: true }).eq('phone', p).eq('used', false)
+        await sb.from('otp_codes').insert({ phone: p, otp_plain: otp, expires_at: exp, used: false, attempts: 0 })
+
+        document.getElementById('phOtpSec').style.display = 'block'
+        b.textContent = 'تم طلب الكود ✓'
+        toast('تم بناء طلب OTP للرقم الجديد، راجع المسؤول', 's')
+      } catch (e) { b.disabled = false; b.textContent = 'إرسال كود التحقق'; toast('حدث خطأ', 'e') }
+    }
+    async function verPhChange() {
+      const p = document.getElementById('newPhInp').value.trim()
+      const otp = document.getElementById('newPhOtp').value.trim()
+      if (otp.length !== 6) { toast('أدخل 6 أرقام', 'e'); return }
+
+      const b = document.getElementById('verPhBtn'); b.disabled = true; b.textContent = 'جاري التأكيد...'
+      try {
+        const { data: r } = await sb.from('otp_codes').select('*').eq('phone', p).eq('used', false).order('created_at', { ascending: false }).limit(1).single()
+        if (!r) { toast('لا يوجد كود نشط لهذا الرقم', 'e'); b.disabled = false; b.textContent = 'تأكيد وتغيير الرقم ✓'; return }
+        if (new Date(r.expires_at) < new Date()) { toast('انتهت صلاحية الكود', 'e'); b.disabled = false; b.textContent = 'تأكيد وتغيير الرقم ✓'; return }
+        if (r.otp_plain !== otp) { await sb.from('otp_codes').update({ attempts: r.attempts + 1 }).eq('id', r.id); toast('الكود غير صحيح', 'e'); b.disabled = false; b.textContent = 'تأكيد وتغيير الرقم ✓'; return }
+
+        await sb.from('otp_codes').update({ used: true }).eq('id', r.id)
+        await sb.from('users').update({ phone: p }).eq('id', ME.id)
+
+        ME.phone = p
+        const setsPh = document.getElementById('setsPh'); if (setsPh) setsPh.textContent = p
+        const curPh = document.getElementById('curPh'); if (curPh) curPh.textContent = p
+        cMod('editPhMod')
+        toast('تم تحديث رقم الهاتف بنجاح ✓', 's')
+      } catch (e) {
+        toast('خطأ في الاتصال بقاعدة البيانات', 'e')
+        b.disabled = false; b.textContent = 'تأكيد وتغيير الرقم ✓'
+      }
+    }
+    async function updProfImg(ev) {
+      const f = ev.target.files[0]; if (!f) return
+      if (f.size > 2 * 1024 * 1024) { toast('الصورة كبيرة جداً (الحد الأقصى 2MB)', 'e'); return }
+      const r = new FileReader()
+      r.onload = async e => {
+        const b64 = e.target.result
+        try {
+          await sb.from('users').update({ profile_image_url: b64 }).eq('id', ME.id)
+          ME.profile_image_url = b64
+          mkAv(document.getElementById('myAv'), ME, 'sm', false)
+          mkAv(document.getElementById('setsAv'), ME, 'lg', false)
+          toast('تم تحديث صورة البروفايل ✓', 's')
+        } catch (err) { toast('فشل تحديث الصورة', 'e') }
+      }
+      r.readAsDataURL(f)
+    }
+    function expK() {
+      ldK().then(k => {
+        if (!k) return toast('لم يتم العثور على مفتاح', 'e')
+        const blob = new Blob([JSON.stringify(k)], { type: 'application/json' })
+        const url = URL.createObjectURL(blob), a = document.createElement('a')
+        a.href = url; a.download = `ITOP_KEY_${ME.username}.json`; a.click(); URL.revokeObjectURL(url)
+        toast('تم تصدير المفتاح بنجاح ✓ قم بحفظه في مكان آمن', 's')
+      })
+    }
+    function showEnc() { ldK().then(k => { if (k) oMod('encMod'); else toast('لا يوجد مفتاح محفوظ على هذا الجهاز', 'e') }); }
+
+    // ══════════════════════════════════════════════════
+    // CONVERSATIONS
+    // ══════════════════════════════════════════════════
+    async function ldCvs() {
+      // Optimized: Fetching participants in a single query if relation exists, 
+      // falling back to manual batching for reliability.
+      const { data } = await sb.from('conversations').select('*').or(`participant_1.eq.${ME.id},participant_2.eq.${ME.id}`)
+      if (!data?.length) { rnEmptyCvs(); return }
+
+      const pIds = [...new Set(data.flatMap(c => [c.participant_1, c.participant_2]))].filter(id => id !== ME.id)
+      const { data: users } = await sb.from('users').select('*').in('id', pIds)
+      const uMap = Object.fromEntries(users.map(u => [u.id, u]))
+
+      const en = await Promise.all(data.map(async c => {
+        const oid = c.participant_1 === ME.id ? c.participant_2 : c.participant_1
+        const o = uMap[oid]
+        const [{ data: lm }, { count }] = await Promise.all([
+          sb.from('messages').select('*').eq('conversation_id', c.id).order('created_at', { ascending: false }).limit(1).single(),
+          sb.from('messages').select('*', { count: 'exact', head: true }).eq('conversation_id', c.id).eq('is_seen', false).neq('sender_id', ME.id)
+        ])
+        return { ...c, o, lm, un: count || 0 }
+      }))
+      en.sort((a, b) => new Date(b.lm?.created_at || b.created_at) - new Date(a.lm?.created_at || a.created_at))
+      allCv = en; rnCvl(en)
+    }
+    function rnEmptyCvs() { document.getElementById('cvlEl').innerHTML = `<div style="text-align:center;padding:48px 20px;color:var(--txt2)"><div style="font-size:48px;margin-bottom:14px">🔐</div><div style="font-size:14px;font-weight:600;color:var(--txt);margin-bottom:8px">لا توجد محادثات</div><button style="background:linear-gradient(135deg,var(--p2),#6366f1);color:#fff;border:none;border-radius:14px;padding:10px 22px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:8px" onclick="openNC()">✚ ابدأ محادثة</button></div>` }
+    function rnCvl(cvs) {
+      const l = document.getElementById('cvlEl')
+      if (!cvs.length) { rnEmptyCvs(); return }
+      l.innerHTML = cvs.map(c => {
+        const prv = c.lm ? (c.lm.is_anonymous ? '🕶️ مجهولة' : (c.lm.msg_type === 'image' ? '🖼️ صورة' : (c.lm.msg_type === 'audio' ? '🎙️ ريكورد' : '🔒 مشفرة'))) : 'لا رسائل'
+        return `<div class="cvi${aConv?.id === c.id ? ' act' : ''}" id="cvi_${c.id}" onclick="opCv('${c.id}')">
+      <div class="av av-sm" id="cav_${c.id}"></div>
+      <div class="ci">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <div class="cn">${esc(c.o?.username || '')}${bdg(c.o?.verification_badge, c.o?.id, c.o?.phone)}</div>
+          <span class="ctm">${c.lm ? fmtT(c.lm.created_at) : ''}</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:3px">
+          <span class="cp">${prv}</span>
+          ${c.un > 0 ? `<span class="ubdg">${c.un > 9 ? '9+' : c.un}</span>` : ''}
+        </div>
+      </div>
+    </div>`
+      }).join('')
+      cvs.forEach(c => { const el = document.getElementById(`cav_${c.id}`); if (el) mkAv(el, c.o, 'sm', true) })
+    }
+    function filtC(q) { rnCvl(allCv.filter(c => c.o?.username?.toLowerCase().includes(q.toLowerCase()))) }
+
+    async function opCv(id) {
+      const c = allCv.find(x => x.id === id); if (!c) return
+      aConv = c
+      document.querySelectorAll('.cvi').forEach(el => el.classList.remove('act'))
+      document.getElementById(`cvi_${id}`)?.classList.add('act')
+      document.getElementById('cvView').style.display = 'none'
+      document.getElementById('cwView').style.display = 'flex'
+      opCW(c)
+    }
+    function backList() {
+      aConv = null
+      document.getElementById('cwView').style.display = 'none'
+      document.getElementById('cvView').style.display = 'flex'
+      clrReply(); if (rtCh) { sb.removeChannel(rtCh); rtCh = null }
+      stopChatSync()
+      ldCvs()
+    }
+
+    // ══════════════════════════════════════════════════
+    // CHAT WINDOW
+    // ══════════════════════════════════════════════════
+    async function opCW(c) {
+      const o = c.o
+      mkAv(document.getElementById('chAv'), o, 'sm', true)
+      document.getElementById('chNm').innerHTML = esc(o.username) + bdg(o.verification_badge, o.id, o.phone) + (o.is_banned ? '<span class="banbdg">محظور</span>' : '')
+      document.getElementById('chSt').textContent = o.is_online ? 'متصل الآن' : 'غير متصل'
+      document.getElementById('chSt').style.color = o.is_online ? 'var(--online)' : 'var(--txt3)'
+
+      if (rtCh) sb.removeChannel(rtCh)
+      clrReply(); updSdIndicator()
+
+      // Show/hide pinned presidential warning
+      const presWarn = document.getElementById('presWarning')
+      if (o.phone === '1' && ME.phone !== '1') {
+        presWarn.style.display = 'flex'
+      } else {
+        presWarn.style.display = 'none'
+      }
+
+      const a = document.getElementById('msgsA')
+      a.innerHTML = ''
+
+      if (o.auto_reply_enabled && o.auto_reply_text) {
+        const ar = document.createElement('div'); ar.className = 'sys-notice'
+        ar.style.borderColor = 'rgba(139,92,246,.3)'; ar.style.background = 'rgba(139,92,246,.05)'
+        ar.innerHTML = `<span class="sys-notice-label" style="color:#a78bfa">رسالة إدارية تلقائية</span><div class="sys-notice-txt" style="color:#c4b5fd">${esc(o.auto_reply_text)}</div>`
+        a.appendChild(ar)
+      }
+
+      await ldMsgs(c)
+      startChatSync(c.id)
+      subCv(c)
+    }
+
+    async function ldMsgs(c) {
+      const a = document.getElementById('msgsA')
+      const { data } = await sb.from('messages').select('*').eq('conversation_id', c.id).order('created_at', { ascending: true }).limit(80)
+      lastMsgSyncAt = data?.length ? data[data.length - 1].created_at : null
+      const ms = await Promise.all((data || []).map(async m => {
+        try {
+          const im = m.sender_id === ME.id
+          const cnt = await hybridDec(im ? m.encrypted_for_sender : m.encrypted_for_receiver)
+          return { ...m, cnt }
+        } catch { return { ...m, cnt: '🔒 لا يمكن فك التشفير' } }
+      }))
+      renderedMsgIds = new Set(ms.map(m => m.id))
+      rnMsgs(ms, true)
+      const us = (data || []).filter(m => m.sender_id !== ME.id && !m.is_seen).map(m => m.id)
+      if (us.length) await sb.from('messages').update({ is_seen: true, is_delivered: true }).in('id', us)
+      ldCvs()
+    }
+
+    function appendMsgIfNew(m) {
+      if (!m?.id || renderedMsgIds.has(m.id)) return false
+      const a = document.getElementById('msgsA')
+      if (!a) return false
+      renderedMsgIds.add(m.id)
+      a.appendChild(mkBub(m))
+      a.scrollTop = a.scrollHeight
+      return true
+    }
+
+    function rnMsgs(ms, skipClear = false) {
+      const a = document.getElementById('msgsA')
+      // Preserve system notices when loading messages
+      const notices = Array.from(a.querySelectorAll('.sys-notice'))
+      if (skipClear) a.innerHTML = ''
+      notices.forEach(n => a.appendChild(n))
+      if (!ms.length && !skipClear) {
+        a.innerHTML = `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px"><div style="font-size:48px;margin-bottom:14px;filter:drop-shadow(0 4px 10px rgba(20,184,166,.3))">🔒</div><div style="font-size:13px;color:var(--txt2);margin-bottom:4px">لا رسائل بعد</div><div style="font-size:11px;color:var(--txt3)">رسائلك مشفرة بالكامل.</div></div>`
+        return
+      }
+      let ld = ''
+      ms.forEach(m => {
+        const d = new Date(m.created_at).toLocaleDateString('ar-EG')
+        if (d !== ld) { const s = document.createElement('div'); s.className = 'dsep'; s.innerHTML = `<span>${d}</span>`; a.appendChild(s); ld = d }
+        a.appendChild(mkBub(m))
+      })
+      a.scrollTop = a.scrollHeight
+    }
+
+    function mkBub(m) {
+      const im = m.sender_id === ME.id
+      const isPres = allCv.find(c => c.id === m.conversation_id)?.o?.phone === '1' || (im && ME.phone === '1')
+      const row = document.createElement('div'); row.className = `mr${im ? ' mn' : ''}`; row.id = `msg_${m.id}`
+      const tm = new Date(m.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })
+      const si = im ? (m.is_seen ? '✓✓' : m.is_delivered ? '✓✓' : '✓') : ''
+      const sc = im && m.is_seen ? 'seen' : ''
+      if (!im) { const av = document.createElement('div'); av.className = 'av av-xs'; mkAv(av, aConv?.o, 'xs', false); row.appendChild(av) }
+
+      if (m.is_auto) {
+        const an = document.createElement('div'); an.className = 'sys-notice'
+        an.style.borderColor = 'rgba(139,92,246,.3)'; an.style.background = 'rgba(139,92,246,.05)'; an.style.margin = '4px 0'
+        an.innerHTML = `<span class="sys-notice-label" style="color:#a78bfa">رسالة إدارية تلقائية</span><div class="sys-notice-txt" style="color:#c4b5fd">${esc(m.cnt)}</div>`
+        return an
+      }
+
+      const bb = document.createElement('div')
+      if (im ? ME.phone === '1' : aConv?.o?.phone === '1') {
+        bb.className = `bb admin${im ? ' mn' : ' th'}`
+        const eag = document.createElement('span'); eag.className = 'admin-eagle'; eag.textContent = '🦅'
+        bb.appendChild(eag)
+      } else {
+        bb.className = `bb ${im ? 'mn' : 'th'}${m.is_anonymous && !im ? ' anon' : ''}`
+      }
+
+      const rplyHTML = m.reply_to_content ? `<div class="rply-prv">${esc(m.reply_to_content.slice(0, 60))}</div>` : ''
+      const sdHTML = m.expires_at ? `<div class="sd-timer">💣 ${fmtT(m.expires_at)}</div>` : ''
+
+      if (m.cnt && m.cnt.startsWith('[AUDIO]')) {
+        const b64 = m.cnt.slice(7)
+        bb.innerHTML = `${rplyHTML}<div class="audio-msg"><button class="audio-play" onclick="playAudio('${m.id}')">▶️</button><div class="audio-wave">${Array(7).fill('<div class="audio-bar"></div>').join('')}</div></div>${sdHTML}<div class="mm${im ? ' mn' : ' th'}"><span>${tm}</span>${im ? `<span class="${sc}">${si}</span>` : ''}</div>`
+        bb.dataset.audio = b64
+      } else if (m.cnt && m.cnt.startsWith('[IMG]')) {
+        const src = m.cnt.slice(5)
+        bb.innerHTML = `${rplyHTML}<div class="img-msg" onclick="openLbox('${src.replace(/'/g, "\\'")}')"><img src="${src}"></div>${sdHTML}<div class="mm${im ? ' mn' : ' th'}"><span>${tm}</span>${im ? `<span class="${sc}">${si}</span>` : ''}</div>`
+      } else {
+        const urlRx = /(https?:\/\/[^\s]+)/g
+        const txt = esc(m.cnt || '').replace(urlRx, u => `<a href="${u}" target="_blank" style="color:var(--p);text-decoration:underline">${u}</a>`)
+        const isPresMsg = (im && ME.phone === '1') || (!im && aConv?.o?.phone === '1')
+        bb.innerHTML = `${m.is_anonymous && !im ? '<div class="atag">🕶️ مجهول</div>' : ''}${rplyHTML}<p style="white-space:pre-wrap" class="${isPresMsg ? 'dev-txt' : ''}">${txt}</p>${sdHTML}<div class="mm${im ? ' mn' : ' th'}"><span>${tm}</span>${im ? `<span class="${sc}">${si}</span>` : ''}</div>`
+      }
+
+      bb.addEventListener('dblclick', () => setReply(m.id, m.cnt || ''))
+      bb.addEventListener('contextmenu', e => { e.preventDefault(); setReply(m.id, m.cnt || '') })
+      row.appendChild(bb); return row
+    }
+
+    function playAudio(msgId) {
+      const bb = document.querySelector(`#msg_${msgId} .bb`)
+      if (!bb?.dataset.audio) return
+      try {
+        const a = new Audio(bb.dataset.audio); a.play()
+        bb.querySelector('.audio-play').textContent = '⏸️'
+        a.onended = () => bb.querySelector('.audio-play').textContent = '▶️'
+      } catch { toast('خطأ في التشغيل', 'e') }
+    }
+
+    function openLbox(src) {
+      document.getElementById('lbox-img').src = src
+      document.getElementById('lbox').classList.add('show')
+    }
+
+    function subCv(c) {
+      if (rtCh) sb.removeChannel(rtCh)
+      lastRealtimeEvtAt = Date.now()
+      rtCh = sb.channel(`chat_${c.id}`)
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${c.id}` }, async p => {
+          const m = p.new
+          lastRealtimeEvtAt = Date.now()
+          lastMsgSyncAt = m.created_at || lastMsgSyncAt
+          const im = m.sender_id === ME.id
+          const a = document.getElementById('msgsA')
+          if (!a) return
+          try {
+            const cnt = await hybridDec(im ? m.encrypted_for_sender : m.encrypted_for_receiver)
+            document.getElementById('typBub2')?.remove()
+            const added = appendMsgIfNew({ ...m, cnt })
+            if (!im) {
+              await sb.from('messages').update({ is_delivered: true, is_seen: true }).eq('id', m.id)
+              if (added) showNotif(c.o?.username || '', cnt, c.id)
+            }
+          } catch (e) { appendMsgIfNew({ ...m, cnt: '🔒 رسالة مشفرة' }) }
+          ldCvs()
+        })
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: `conversation_id=eq.${c.id}` }, p => {
+          lastRealtimeEvtAt = Date.now()
+          const m = p.new; if (m.sender_id !== ME.id) return
+          const el = document.getElementById(`msg_${m.id}`)
+          if (el) {
+            const s = el.querySelector('.mm span:last-child')
+            if (s) { s.textContent = m.is_seen ? '✓✓' : m.is_delivered ? '✓✓' : '✓'; if (m.is_seen) s.className = 'seen' }
+          }
+        })
+        .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'messages', filter: `conversation_id=eq.${c.id}` }, p => { lastRealtimeEvtAt = Date.now(); renderedMsgIds.delete(p.old.id); document.getElementById(`msg_${p.old.id}`)?.remove() })
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'typing_indicators', filter: `conversation_id=eq.${c.id}` }, p => {
+          lastRealtimeEvtAt = Date.now()
+          const a = document.getElementById('msgsA'), ex = document.getElementById('typBub2')
+          if (p.eventType === 'DELETE' || p.new?.user_id === ME.id) { ex?.remove(); return }
+          if (p.new?.user_id !== ME.id && !ex) {
+            const r = document.createElement('div'); r.className = 'mr'; r.id = 'typBub2'
+            r.innerHTML = '<div class="av av-xs" id="tAv2"></div><div class="typbub"><div class="td"></div><div class="td"></div><div class="td"></div></div>'
+            a?.appendChild(r); mkAv(document.getElementById('tAv2'), c.o, 'xs', false); a && (a.scrollTop = a.scrollHeight)
+          }
+        })
+        .subscribe()
+    }
+
+    function stopChatSync() {
+      if (chatSyncInt) { clearInterval(chatSyncInt); chatSyncInt = null }
+      lastMsgSyncAt = null
+      renderedMsgIds.clear()
+      lastRealtimeEvtAt = 0
+    }
+    function startChatSync(convId) {
+      stopChatSync()
+      lastRealtimeEvtAt = Date.now()
+      chatSyncInt = setInterval(async () => {
+        if (!aConv?.id || aConv.id !== convId) return
+        try {
+          if (rtCh && lastRealtimeEvtAt && Date.now() - lastRealtimeEvtAt > 12000) subCv(aConv)
+          const { data: latest } = await sb.from('messages').select('id,created_at').eq('conversation_id', convId).order('created_at', { ascending: false }).limit(1).single()
+          if (!latest) return
+          if (!lastMsgSyncAt) { lastMsgSyncAt = latest.created_at; return }
+          if (new Date(latest.created_at) > new Date(lastMsgSyncAt)) await ldMsgs(aConv)
+        } catch { }
+      }, 2000)
+    }
+
+    // ══════════════════════════════════════════════════
+    // REPLY & SEND
+    // ══════════════════════════════════════════════════
+    function setReply(id, cnt) { replyTo = { id, content: cnt }; const b = document.getElementById('rplyBar'); b.classList.add('show'); document.getElementById('rplyCnt').textContent = 'رداً على: ' + cnt.slice(0, 60); document.getElementById('mInp').focus() }
+    function clrReply() { replyTo = null; document.getElementById('rplyBar').classList.remove('show') }
+
+    async function sndMsg() {
+      if (!aConv) return
+      const o = aConv.o
+      if (!o.public_key) { toast('لا يوجد مفتاح تشفير', 'e'); return }
+      if (o.is_banned) { toast('هذا المستخدم محظور', 'e'); return }
+      if (pendingImg) { await sendImgMsg(); return }
+      const inp = document.getElementById('mInp')
+      const txt = inp.value.trim(); if (!txt) return
+      document.getElementById('sndB').disabled = true; inp.value = ''; autoRz(inp)
+      try {
+        const { data: me } = await sb.from('users').select('public_key').eq('id', ME.id).single()
+        const [fr, fs] = await Promise.all([hybridEnc(txt, o.public_key), hybridEnc(txt, me.public_key)])
+        let cid = aConv.id
+        if (!cid) { const { data: nc } = await sb.from('conversations').insert({ participant_1: ME.id, participant_2: o.id }).select().single(); cid = nc.id; aConv = { ...aConv, id: cid } }
+        const md = { conversation_id: cid, sender_id: ME.id, encrypted_for_receiver: fr, encrypted_for_sender: fs, is_anonymous: anon, msg_type: 'text' }
+        if (replyTo) { md.reply_to_id = replyTo.id; md.reply_to_content = replyTo.content.slice(0, 100) }
+        if (sdEnabled) md.expires_at = new Date(Date.now() + sdSeconds * 1000).toISOString()
+        await sb.from('messages').insert(md)
+        clrReply(); clearTimeout(tpTO)
+        await sb.from('typing_indicators').delete().eq('conversation_id', cid).eq('user_id', ME.id)
+      } catch { toast('فشل الإرسال', 'e'); inp.value = txt; autoRz(inp) }
+      finally { document.getElementById('sndB').disabled = false; document.getElementById('mInp').focus() }
+    }
+
+    async function sendImgMsg() {
+      if (!pendingImg || !aConv) return
+      const o = aConv.o; document.getElementById('sndB').disabled = true
+      try {
+        const val = '[IMG]' + pendingImg
+        const { data: me } = await sb.from('users').select('public_key').eq('id', ME.id).single()
+        const [fr, fs] = await Promise.all([hybridEnc(val, o.public_key), hybridEnc(val, me.public_key)])
+        let cid = aConv.id
+        if (!cid) { const { data: nc } = await sb.from('conversations').insert({ participant_1: ME.id, participant_2: o.id }).select().single(); cid = nc.id; aConv = { ...aConv, id: cid } }
+        const md = { conversation_id: cid, sender_id: ME.id, encrypted_for_receiver: fr, encrypted_for_sender: fs, is_anonymous: anon, msg_type: 'image' }
+        if (sdEnabled) md.expires_at = new Date(Date.now() + sdSeconds * 1000).toISOString()
+        await sb.from('messages').insert(md)
+        clrImg(); toast('تم إرسال الصورة ✓', 's')
+      } catch { toast('فشل الصورة', 'e') }
+      finally { document.getElementById('sndB').disabled = false }
+    }
+
+    function hKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sndMsg() } }
+    async function hTyp() {
+      if (!aConv?.id) return
+      await sb.from('typing_indicators').upsert({ conversation_id: aConv.id, user_id: ME.id, updated_at: new Date().toISOString() }, { onConflict: 'conversation_id,user_id' })
+      clearTimeout(tpTO); tpTO = setTimeout(async () => { if (aConv) await sb.from('typing_indicators').delete().eq('conversation_id', aConv.id).eq('user_id', ME.id) }, 2000)
+    }
+    function togAnon() { anon = !anon; const b = document.getElementById('aBtn'); b.classList.toggle('on', anon); b.textContent = anon ? '🕶️ مفعّل' : '🕶️ مجهول'; document.getElementById('mInp').placeholder = anon ? 'مجهولة...' : 'اكتب رسالة...' }
+
+    // ══════════════════════════════════════════════════
+    // NEW CHAT & MODALS
+    // ══════════════════════════════════════════════════
+    function openNC() { document.getElementById('srchPh').value = ''; document.getElementById('srchRes').innerHTML = ''; oMod('ncMod') }
+    async function srchU() {
+      const ph = document.getElementById('srchPh').value.trim(); if (!ph) return
+      const r = document.getElementById('srchRes'); r.innerHTML = '<div style="display:flex;justify-content:center;padding:20px"><div class="sp2"></div></div>'
+      try {
+        const { data: u } = await sb.from('users').select('*').eq('phone', ph).neq('id', ME.id).single()
+        if (!u) { r.innerHTML = '<p style="text-align:center;padding:16px;font-size:13px;color:var(--txt3)">لا يوجد مستخدم</p>'; return }
+        r.innerHTML = `<div class="fu"><div class="av av-md" id="fuAv"></div><div style="flex:1"><div style="font-size:14px;font-weight:600;display:flex;align-items:center;gap:4px">${esc(u.username)}${bdg(u.verification_badge, u.id, u.phone)}${u.is_banned ? '<span class="banbdg">محظور</span>' : ''}</div><div style="font-size:12px;color:${u.is_online ? 'var(--online)' : 'var(--txt3)'};margin-top:3px">${u.is_online ? 'متصل' : 'غير متصل'}</div></div><button class="btn" style="width:auto;margin:0;padding:8px 16px" onclick="strtW()">محادثة</button></div>`
+        mkAv(document.getElementById('fuAv'), u, 'md', false); window._fu = u
+      } catch { r.innerHTML = '<p style="text-align:center;padding:16px;font-size:13px;color:var(--txt3)">لا يوجد مستخدم</p>' }
+    }
+    async function strtW() {
+      const o = window._fu; if (!o) return; cMod('ncMod')
+      const { data: ex } = await sb.from('conversations').select('*').or(`and(participant_1.eq.${ME.id},participant_2.eq.${o.id}),and(participant_1.eq.${o.id},participant_2.eq.${ME.id})`).single()
+      let c = ex; if (!c) { const { data: nc } = await sb.from('conversations').insert({ participant_1: ME.id, participant_2: o.id }).select().single(); c = nc }
+      aConv = { ...c, o }; await ldCvs(); opCv(c.id)
+    }
+    function oMod(id) { document.getElementById(id).classList.add('show') }
+    function cMod(id) { document.getElementById(id).classList.remove('show') }
+
+    // ══════════════════════════════════════════════════
+    // ADMIN
+    // ══════════════════════════════════════════════════
+    let adD = {}, curAT = 'ov'
+    async function ldAd() {
+      if (!isAdmin()) return
+      const [u, o, m, cv] = await Promise.all([
+        sb.from('users').select('*', { count: 'exact' }).order('created_at', { ascending: false }).limit(500),
+        sb.from('otp_codes').select('*', { count: 'exact' }).order('created_at', { ascending: false }).limit(100),
+        sb.from('messages').select('id,created_at,sender_id,conversation_id,msg_type', { count: 'exact' }).order('created_at', { ascending: false }).limit(500),
+        sb.from('conversations').select('*', { count: 'exact' }).order('created_at', { ascending: false }).limit(200)
+      ])
+      adD = {
+        us: u.data || [],
+        ot: o.data || [],
+        ms: m.data || [],
+        cv: cv.data || [],
+        st: {
+          t: u.count || 0,
+          on: u.data?.filter(x => x.is_online).length || 0,
+          vr: u.data?.filter(x => x.verification_badge !== 'none').length || 0,
+          ot: o.data?.filter(x => !x.used).length || 0,
+          ms: m.count || 0,
+          bn: u.data?.filter(x => x.is_banned).length || 0
+        }
+      }
+      rnAdSt(); adTab(curAT, document.querySelector('.at.act'))
+    }
+
+    function rnAdSt() {
+      const s = adD.st
+      document.getElementById('adStats').innerHTML = `
+        <div class="stcard gl" style="background:linear-gradient(135deg,rgba(20,184,166,.12),transparent)">
+          <span class="stv" style="color:var(--p)">${s.t}</span>
+          <span class="stl">🙍 إجمالي المستخدمين</span>
+        </div>
+        <div class="stcard gl" style="background:linear-gradient(135deg,rgba(52,211,153,.12),transparent)">
+          <span class="stv" style="color:var(--online)">${s.on}</span>
+          <span class="stl">🟢 متصل الآن</span>
+        </div>
+        <div class="stcard gl" style="background:linear-gradient(135deg,rgba(59,130,246,.12),transparent)">
+          <span class="stv" style="color:#60a5fa">${s.vr}</span>
+          <span class="stl">✅ موثَّقون</span>
+        </div>
+        <div class="stcard gl" style="background:linear-gradient(135deg,rgba(245,158,11,.12),transparent)">
+          <span class="stv" style="color:var(--ylw)">${s.ot}</span>
+          <span class="stl">🔑 OTP نشطة</span>
+        </div>
+        <div class="stcard gl" style="background:linear-gradient(135deg,rgba(239,68,68,.12),transparent)">
+          <span class="stv" style="color:#f87171">${s.bn}</span>
+          <span class="stl">🚫 محظورون</span>
+        </div>
+        <div class="stcard gl" style="background:linear-gradient(135deg,rgba(168,85,247,.12),transparent)">
+          <span class="stv" style="color:#c084fc">${s.ms}</span>
+          <span class="stl">💬 رسائل</span>
+        </div>
+      `
+    }
+
+    function adTab(t, btn) {
+      curAT = t
+      document.querySelectorAll('#admTabs .at').forEach(b => b.classList.remove('act'))
+      btn?.classList.add('act')
+      const c = document.getElementById('adCnt')
+
+      if (t === 'ov') {
+        const latest5 = adD.us.slice(0, 5)
+        c.innerHTML = `
+          <div class="acard gl">
+            <div class="ach">أحدث المستخدمين <span class="ach-badge">${adD.us.length} مستخدم</span></div>
+            ${latest5.map(u => `<div class="ar">
+              <div class="av av-sm" id="adav_${u.id}"></div>
+              <div class="aui">
+                <div class="aun">${esc(u.username)}${bdg(u.verification_badge, u.id, u.phone)}${u.is_banned ? ' <span class="banbdg">BANNED</span>' : ''}</div>
+                <div class="aph">${u.phone}</div>
+              </div>
+              <span class="ont ${u.is_online ? 'on' : 'off'}">${u.is_online ? '● متصل' : '○ غير متصل'}</span>
+            </div>`).join('')}
+          </div>
+          <div class="acard gl" style="margin-top:10px">
+            <div class="ach">آخر الرسائل <span class="ach-badge">${adD.ms.length}</span></div>
+            ${adD.ms.slice(0, 5).map(m => `<div class="ar">
+              <div class="aui">
+                <div class="aun">${m.msg_type === 'text' ? '📝 رسالة نصية' : m.msg_type === 'image' ? '🖼️ صورة' : '🎙️ ريكورد'}</div>
+                <div class="aph">${fmtT(m.created_at)}</div>
+              </div>
+              <button class="aab danger" onclick="adDelMsg('${m.id}')" title="حذف">🗑️</button>
+            </div>`).join('')}
+          </div>`
+        latest5.forEach(u => { const el = document.getElementById(`adav_${u.id}`); if (el) mkAv(el, u, 'sm', true) })
+
+      } else if (t === 'us') {
+        c.innerHTML = `
+          <input class="adm-search" placeholder="🔍 بحث بالاسم أو الرقم..." oninput="filtAdU(this.value)">
+          <div class="acard gl" id="adUCard">${rnAdUsrs(adD.us)}</div>`
+        adD.us.forEach(u => { const el = document.getElementById(`uav_${u.id}`); if (el) mkAv(el, u, 'sm', true) })
+
+      } else if (t === 'ot') {
+        const activeOTPs = adD.ot.filter(o => !o.used)
+        c.innerHTML = `
+          <div class="acard gl">
+            <div class="ach">توليد كود OTP جديد <span class="ach-badge">${activeOTPs.length} نشط</span></div>
+            <div class="otp-form">
+              <input class="otpinp" id="adOPh" placeholder="رقم الهاتف +20..." dir="ltr">
+              <button class="byel" onclick="adGenOTP()">توليد</button>
+            </div>
+            <div id="adORes"></div>
+          </div>
+          <div class="acard gl" style="margin-top:10px">
+            <div class="ach">آخر الأكواد المُنشأة</div>
+            ${adD.ot.slice(0, 20).map(o => `<div class="ar">
+              <div class="aui">
+                <div class="aun" dir="ltr">${o.phone}</div>
+                <div class="aph">كود: <b style="color:${o.used ? 'var(--txt3)' : '#fef08a'}">${o.otp_plain}</b> — ${o.used ? '✅ مستخدم' : '⏳ نشط'}</div>
+              </div>
+              <button class="aab danger" onclick="adDelOTP('${o.id}')">🗑️</button>
+            </div>`).join('')}
+          </div>`
+
+      } else if (t === 'ms') {
+        c.innerHTML = `
+          <div class="acard gl">
+            <div class="ach">إدارة الرسائل <span class="ach-badge">${adD.ms.length} رسالة</span></div>
+            <div style="padding:10px 14px;display:flex;gap:8px">
+              <button class="adm-act-btn" onclick="adDelAllMsgs()">🗑️ حذف جميع الرسائل</button>
+            </div>
+            ${adD.ms.map(m => `<div class="ar">
+              <div class="aui">
+                <div class="aun">${m.msg_type === 'text' ? '📝 نصية' : m.msg_type === 'image' ? '🖼️ صورة' : '🎙️ ريكورد'}</div>
+                <div class="aph">${fmtT(m.created_at)}</div>
+              </div>
+              <button class="aab danger" onclick="adDelMsg('${m.id}')">🗑️</button>
+            </div>`).join('')}
+          </div>`
+
+      } else if (t === 'cv') {
+        c.innerHTML = `
+          <div class="acard gl">
+            <div class="ach">المحادثات <span class="ach-badge">${adD.cv.length}</span></div>
+            <div style="padding:10px 14px">
+              <button class="adm-act-btn" onclick="adDelAllCvs()">🗑️ حذف جميع المحادثات</button>
+            </div>
+            ${adD.cv.map(cv => `<div class="ar">
+              <div class="aui">
+                <div class="aun" style="font-size:11px;direction:ltr">${cv.id.slice(0, 8)}...</div>
+                <div class="aph">${fmtT(cv.created_at)}</div>
+              </div>
+              <button class="aab danger" onclick="adDelCv('${cv.id}')">🗑️</button>
+            </div>`).join('')}
+          </div>`
+
+      } else if (t === 'pf') {
+        c.innerHTML = `
+          <div class="acard gl">
+            <div class="ach">⚙️ إعدادات حساب الأدمن</div>
+            <div style="padding:20px;text-align:center">
+              <div style="position:relative;display:inline-block;margin-bottom:16px">
+                <div class="adm-prof-av av" id="admProfAv" onclick="document.getElementById('admProfFile').click()" style="cursor:pointer"></div>
+                <div class="adm-prof-edit">📷</div>
+                <input type="file" id="admProfFile" accept="image/*" style="display:none" onchange="admUpdImg(event)">
+              </div>
+              <div style="font-size:16px;font-weight:700;margin-bottom:4px">${esc(ME?.username || '')}</div>
+              <div style="font-size:12px;color:var(--txt2);margin-bottom:20px" dir="ltr">${ME?.phone || ''}</div>
+            </div>
+            <div style="padding:0 14px 14px;display:flex;flex-direction:column;gap:0">
+              <div style="font-size:12px;color:var(--txt3);margin-bottom:8px;font-weight:600">تغيير الاسم</div>
+              <input class="adm-inp" id="admNmInp" value="${esc(ME?.username || '')}" placeholder="الاسم الجديد" maxlength="30">
+              <div style="font-size:12px;color:var(--txt3);margin-bottom:8px;font-weight:600">تغيير رقم الهاتف</div>
+              <input class="adm-inp" id="admPhInp" value="${esc(ME?.phone || '')}" placeholder="+201234567890" dir="ltr">
+              <button class="btn" onclick="admSaveProf()" style="margin-top:4px">💾 حفظ التغييرات</button>
+            </div>
+          </div>
+          <div class="acard gl" style="margin-top:10px">
+            <div class="ach">🕒 الجلسة الرئاسية</div>
+            <div style="padding:14px">
+              <p style="font-size:12px;color:var(--txt2);line-height:1.6;margin-bottom:12px">تسجيل خروج يتطلب OTP للعودة. تأكد من حفظ مفتاح الأمان أولاً.</p>
+              <button class="btn" style="background:rgba(239,68,68,.2);color:#f87171;box-shadow:none" onclick="doLogout()">🚪 تسجيل الخروج</button>
+            </div>
+          </div>`
+        // Render admin avatar in the new card
+        setTimeout(() => { const el = document.getElementById('admProfAv'); if (el) mkAv(el, ME, 'lg', false) }, 50)
+      }
+    }
+
+    async function admUpdImg(ev) {
+      const f = ev.target.files[0]; if (!f) return
+      if (f.size > 2 * 1024 * 1024) { toast('الصورة كبيرة جداً (الحد 2MB)', 'e'); return }
+      const r = new FileReader()
+      r.onload = async e => {
+        const b64 = e.target.result
+        try {
+          await sb.from('users').update({ profile_image_url: b64 }).eq('id', ME.id)
+          ME.profile_image_url = b64
+          mkAv(document.getElementById('myAv'), ME, 'sm', false)
+          mkAv(document.getElementById('setsAv'), ME, 'lg', false)
+          const admEl = document.getElementById('admProfAv'); if (admEl) mkAv(admEl, ME, 'lg', false)
+          toast('تم تحديث صورة الأدمن ✓', 's')
+        } catch { toast('فشل التحديث', 'e') }
+      }
+      r.readAsDataURL(f)
+    }
+
+    async function admSaveProf() {
+      const nm = document.getElementById('admNmInp')?.value.trim()
+      const ph = document.getElementById('admPhInp')?.value.trim()
+      if (!nm || nm.length < 2) { toast('الاسم يجب أن يكون حرفين على الأقل', 'e'); return }
+      try {
+        await sb.from('users').update({ username: nm, phone: ph }).eq('id', ME.id)
+        ME.username = nm; ME.phone = ph
+        document.getElementById('myNm').innerHTML = nm + bdg(ME.verification_badge, ME.id, ME.phone)
+        document.getElementById('setsNm').innerHTML = nm + bdg(ME.verification_badge, ME.id, ME.phone)
+        document.getElementById('curNm').textContent = nm
+        document.getElementById('setsPh').textContent = ph
+        document.getElementById('curPh').textContent = ph
+        toast('تم حفظ بيانات الأدمن بنجاح ✓', 's')
+        await ldAd()
+      } catch { toast('خطأ في الحفظ', 'e') }
+    }
+
+    async function adDelMsg(mid) {
+      if (!confirm('حذف هذه الرسالة نهائياً؟')) return
+      await sb.from('messages').delete().eq('id', mid)
+      toast('تم حذف الرسالة ✓', 's'); await ldAd()
+    }
+    async function adDelAllMsgs() {
+      if (!confirm('⚠️ حذف جميع الرسائل نهائياً؟ لا يمكن التراجع!')) return
+      await sb.from('messages').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      toast('تم حذف جميع الرسائل ✓', 's'); await ldAd()
+    }
+    async function adDelCv(cvId) {
+      if (!confirm('حذف هذه المحادثة ورسائلها؟')) return
+      await sb.from('messages').delete().eq('conversation_id', cvId)
+      await sb.from('conversations').delete().eq('id', cvId)
+      toast('تم حذف المحادثة ✓', 's'); await ldAd()
+    }
+    async function adDelAllCvs() {
+      if (!confirm('⚠️ حذف جميع المحادثات والرسائل؟ لا يمكن التراجع!')) return
+      await sb.from('messages').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      await sb.from('conversations').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+      toast('تم حذف كل شيء ✓', 's'); await ldAd()
+    }
+    async function adDelOTP(id) {
+      await sb.from('otp_codes').delete().eq('id', id)
+      toast('تم حذف الكود ✓', 's'); await ldAd()
+    }
+
+    function rnAdUsrs(us) {
+      const bdgLegend = `
+        <div class="bdg-legend">
+          <div class="bdg-leg-item"><div class="bdg-leg-dot" style="background:#3b82f6"></div>أزرق = مشهور</div>
+          <div class="bdg-leg-item"><div class="bdg-leg-dot" style="background:#eab308"></div>ذهبي = قيادة</div>
+          <div class="bdg-leg-item"><div class="bdg-leg-dot" style="background:#a855f7"></div>بنفسجي = حكومي</div>
+          <div class="bdg-leg-item"><div class="bdg-leg-dot" style="background:#f97316"></div>برتقالي = تاجر</div>
+          <div class="bdg-leg-item"><div class="bdg-leg-dot" style="background:#ef4444"></div>أحمر = إدارة</div>
+        </div>`
+      return `<div class="ach">إدارة المستخدمين <span class="ach-badge">${us.length} مستخدم</span></div>
+        ${bdgLegend}
+        ${us.map(u => `<div class="ar">
+          <div class="av av-sm" id="uav_${u.id}"></div>
+          <div class="aui">
+            <div class="aun">${esc(u.username)}${bdg(u.verification_badge, u.id, u.phone)}${u.is_banned ? ' <span class="banbdg">BANNED</span>' : ''}</div>
+            <div class="aph">${u.phone}${u.is_online ? ' <span style="color:var(--online)">● متصل</span>' : ''}</div>
+          </div>
+          <div class="aacts">
+            <div class="bbs">${['blue', 'gold', 'purple', 'orange', 'red', 'none'].map(b => `<button class="bbo${u.verification_badge === b ? ' sel' : ''}" style="background:${BC[b] || 'rgba(255,255,255,.1)'}" onclick="sBdg('${u.id}','${b}')" title="${BL[b] || 'بدون توثيق'}"></button>`).join('')}</div>
+            <button class="aab ${u.is_banned ? 'success' : 'danger'}" onclick="tBan('${u.id}',${u.is_banned})">${u.is_banned ? '✅ رفع الحظر' : '🚫 حظر'}</button>
+            <button class="aab danger" onclick="adDelUsrMsgs('${u.id}')" title="حذف رسائل">🗑️</button>
+          </div>
+        </div>`).join('')}`
+    }
+
+    async function tBan(uid, isB) {
+      if (uid === ME.id) { toast('لا يمكنك حظر نفسك', 'e'); return }
+      await sb.from('users').update({ is_banned: !isB, device_fingerprint: null }).eq('id', uid)
+      toast(isB ? '✅ تم رفع الحظر' : '🚫 تم حظر المستخدم بنجاح', 's'); await ldAd()
+    }
+    async function adDelUsrMsgs(uid) {
+      if (!confirm('حذف جميع رسائل هذا المستخدم؟')) return
+      await sb.from('messages').delete().eq('sender_id', uid)
+      toast('تم حذف رسائل المستخدم ✓', 's'); await ldAd()
+    }
+    function filtAdU(q) {
+      const f = adD.us.filter(u => u.username?.toLowerCase().includes(q.toLowerCase()) || u.phone?.includes(q))
+      document.getElementById('adUCard').innerHTML = rnAdUsrs(f)
+      f.forEach(u => { const el = document.getElementById(`uav_${u.id}`); if (el) mkAv(el, u, 'sm', true) })
+    }
+    async function sBdg(uid, badge) { await sb.from('users').update({ verification_badge: badge }).eq('id', uid); toast('تم ✓', 's'); await ldAd() }
+    async function adGenOTP() {
+      const ph = document.getElementById('adOPh').value.trim(); if (!ph) return
+      const otp = Math.floor(100000 + Math.random() * 900000).toString()
+      await sb.from('otp_codes').insert({ phone: ph, otp_plain: otp, expires_at: new Date(Date.now() + 10 * 60 * 1000).toISOString(), used: false })
+      document.getElementById('adORes').innerHTML = `<div class="ores"><div style="font-size:12px;color:var(--txt2);margin-bottom:8px">كود التحقق لـ ${esc(ph)}:</div><div class="ocode">${otp}</div><div style="font-size:11px;color:var(--txt3);margin-top:8px">⏱️ صالح لمدة 10 دقائق</div></div>`
+      toast('تم توليد الكود ✓', 's')
+    }
+
+    // ══════════════════════════════════════════════════
+    // INIT
+    // ══════════════════════════════════════════════════
+    buildEmoji()
+    const acc = localStorage.getItem('itop_accent'); if (acc) {
+      document.documentElement.style.setProperty('--p', acc)
+      document.documentElement.style.setProperty('--p2', acc)
+    }
+    async function init() {
+      const raw = localStorage.getItem(SESS)
+      if (raw) {
+        try {
+          const s = JSON.parse(raw)
+          const { data: u } = await sb.from('users').select('*').eq('id', s.id).single()
+          if (u) {
+            if (!await hasK()) { localStorage.removeItem(SESS); pg('auth'); return }
+            if (u.is_banned) { toast('محظور', 'e'); localStorage.removeItem(SESS); pg('auth'); return }
+            ME = u; await enterChat(); return
+          }
+        } catch { }
+        localStorage.removeItem(SESS)
+      }
+      pg('auth')
+    }
+    init()
+  </script>
+</body>
+
+</html>

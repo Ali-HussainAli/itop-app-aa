@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "940226689739",
+    "project_id": "itop-28ad8",
+    "storage_bucket": "itop-28ad8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:940226689739:android:d63969042df31567a5794e",
+        "android_client_info": {
+          "package_name": "com.itop.chat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkcdg1X49_LyCQfO0iGhR2rM8zo5n0F2U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
